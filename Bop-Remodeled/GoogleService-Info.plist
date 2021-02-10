@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>691622662668-puhc7oebrgi7u4lgnf2b0b0gth5ffcdo.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.691622662668-puhc7oebrgi7u4lgnf2b0b0gth5ffcdo</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCbkCyytosn6F0OfOWHyXOBjHGVDRsFP0A</string>
+	<key>GCM_SENDER_ID</key>
+	<string>691622662668</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.bradthomas.Bop-Remodeled</string>
+	<key>PROJECT_ID</key>
+	<string>bopremodeled</string>
+	<key>STORAGE_BUCKET</key>
+	<string>bopremodeled.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:691622662668:ios:e6cea54c9d06b31fe5d429</string>
+</dict>
+</plist>

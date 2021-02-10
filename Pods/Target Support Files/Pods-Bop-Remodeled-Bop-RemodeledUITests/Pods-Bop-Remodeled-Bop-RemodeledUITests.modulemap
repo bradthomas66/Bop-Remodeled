@@ -1,0 +1,6 @@
+framework module Pods_Bop_Remodeled_Bop_RemodeledUITests {
+  umbrella header "Pods-Bop-Remodeled-Bop-RemodeledUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}

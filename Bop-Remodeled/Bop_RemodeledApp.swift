@@ -6,15 +6,19 @@
 //
 
 import SwiftUI
+import Firebase
 
 @main
 struct Bop_RemodeledApp: App {
-    let persistenceController = PersistenceController.shared
+    
+    let persistenceController = PersistenceController.shared    
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            LaunchView()
+//            DashboardView()
+//                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+//                .environmentObject(DashboardInteractionHandler())
         }
     }
 }

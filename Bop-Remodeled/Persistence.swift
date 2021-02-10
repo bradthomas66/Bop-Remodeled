@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import Firebase
 
 struct PersistenceController {
     static let shared = PersistenceController()
@@ -31,6 +32,7 @@ struct PersistenceController {
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
+        FirebaseApp.configure()
         container = NSPersistentContainer(name: "Bop_Remodeled")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")

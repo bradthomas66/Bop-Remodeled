@@ -11,14 +11,18 @@ import Firebase
 @main
 struct Bop_RemodeledApp: App {
     
-    let persistenceController = PersistenceController.shared    
-
+    let persistenceController = PersistenceController.shared
+    
+    init() {
+        FirebaseApp.configure()
+    }
+    
     var body: some Scene {
         WindowGroup {
-            LaunchView()
-//            DashboardView()
-//                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-//                .environmentObject(DashboardInteractionHandler())
+            //LaunchView()
+            DashboardView()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environmentObject(DashboardInteractionHandler())
         }
     }
 }

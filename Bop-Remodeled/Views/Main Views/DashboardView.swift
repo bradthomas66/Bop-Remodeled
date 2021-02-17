@@ -4,7 +4,6 @@
 //
 //  Created by Brad Thomas on 2020-12-12.
 //
-// test comment
 
 import SwiftUI
 import CoreData
@@ -81,21 +80,25 @@ struct ChatBubbleScrollView: View {
     
     @State private var chatsOnScreen: [ChatBubbleData] = [] {
         didSet {
-            print(chatsOnScreen)
+            zoomToLargestChat(chatsOnScreen)
         }
     }
+    @State private var zoomScale: CGFloat = 1.0
     
     var body: some View {
-        ScrollView {
-            ScrollViewReader { action in
+        ScrollViewReader { action in
+            ScrollView {
                 ZStack {
                     if interactionHandler.isShowingPopover {
                         ChatBubblePopoverBackgroundRectangle(geometry: geometry, offScreenOffset: offScreenOffset)
                     }
-                    VStack {
+                    LazyVStack {
                         ForEach(chatHandler.parsedChatsSorted) { chat in
-                            ChatBubbleView(chatToBubble: ChatBubbleData(content: chat.content, frequency: chat.frequency, size: chat.size, id: chat.id))
-                                .onAppear(perform: {chatsOnScreen.append(chat)})
+                            ChatBubbleView(chatToBubble: ChatBubbleData(content: chat.content, frequency: chat.frequency, size: chat.size, id: chat.id), zoomScale: $zoomScale)
+                                .onAppear(perform: {
+                                    chatsOnScreen = []
+                                    chatsOnScreen.append(chat)
+                                })
                         }.onReceive(interactionHandler.$activeChat, perform: { _ in
                             var activeIndex: Int
                             if interactionHandler.activeChat != nil {
@@ -113,6 +116,19 @@ struct ChatBubbleScrollView: View {
                 }
             }
         }
+    }
+    private func zoomToLargestChat(_ data: [ChatBubbleData]) {
+        
+        var maxSize: CGFloat = 0.0
+        
+        for row in data {
+            if row.size > maxSize {
+                maxSize = row.size
+            }
+        }
+        
+        zoomScale = 0.8 / maxSize //inverse of chat.size; ex: chat.size = 0.5, zoomScale = 2 -> chat.size * zoomScale = 1
+        
     }
 }
 

@@ -23,7 +23,7 @@ struct SendMessageView: View {
         GeometryReader { geometry in
             
             let screenHeight = geometry.size.height
-            let offScreenOffset = screenHeight * 0.5
+            let offScreenOffset = screenHeight
             
             ZStack {
                 Background()

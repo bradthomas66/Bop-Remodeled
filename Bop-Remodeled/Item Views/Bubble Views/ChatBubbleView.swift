@@ -12,16 +12,17 @@ struct ChatBubbleView: View {
     let chatToBubble: ChatBubbleData
     @EnvironmentObject var interactionHandler: DashboardInteractionHandler
     private let constants = Constants()
+    @Binding var zoomScale: CGFloat
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 ChatBoundingCircle()
-                ChatContentStack(chatToBubble: chatToBubble)
+                ChatContentStack(chatToBubble: chatToBubble, zoomScale: $zoomScale)
             }.onTapGesture(perform: {
                 interactionHandler.handleBubbleTap(geometry: geometry, chatToBubble: chatToBubble)
             })
-        }.frame(width: constants.maxCircleSize * chatToBubble.size, height: constants.maxCircleSize * chatToBubble.size, alignment: .center)
+        }.frame(width: constants.maxCircleSize * chatToBubble.size * zoomScale, height: constants.maxCircleSize * chatToBubble.size * zoomScale, alignment: .center)
         .padding([.leading, .trailing])
     }
     
@@ -44,13 +45,14 @@ struct ChatBoundingCircle: View {
 struct ChatContentStack: View {
     var chatToBubble: ChatBubbleData
     private let constants = Constants()
+    @Binding var zoomScale: CGFloat
     
     var body: some View {
         VStack {
             Text(chatToBubble.content).foregroundColor(ColorManager.whiteText)
-                .font(Font.system(size: constants.maxCircleSize * chatToBubble.size * contentFontScale))
+                .font(Font.system(size: constants.maxCircleSize * chatToBubble.size * zoomScale * contentFontScale))
             Text(chatToBubble.frequency.withCommas()).foregroundColor(ColorManager.whiteText)
-                .font(Font.system(size: constants.maxCircleSize * chatToBubble.size * frequencyFontScale))
+                .font(Font.system(size: constants.maxCircleSize * chatToBubble.size * zoomScale * frequencyFontScale))
         }
     }
     
@@ -62,7 +64,7 @@ struct ChatBubble_Previews: PreviewProvider {
     static var previews: some View {
         ZStack{
             Rectangle().edgesIgnoringSafeArea(.all)
-            ChatBubbleView(chatToBubble: ChatBubbleData(content: "🥵", frequency: 40, size: 0.5, id: 1))
+            ChatBubbleView(chatToBubble: ChatBubbleData(content: "🥵", frequency: 40, size: 0.5, id: 1), zoomScale: .constant(0.5))
         }
         
     }

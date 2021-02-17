@@ -31,7 +31,7 @@ struct EmojiTextFieldPopover: View {
                     .padding(.top)
                 Spacer()
             }
-        }.frame(minHeight: parentViewHeight * 0.4, maxHeight: parentViewHeight * 0.5)
+        }.frame(minHeight: parentViewHeight * 0.33, maxHeight: parentViewHeight * 0.33)
     }
 }
 

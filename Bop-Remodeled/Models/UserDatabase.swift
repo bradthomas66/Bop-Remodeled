@@ -44,8 +44,14 @@ struct UserDatabase {
         parsedContactsSorted = []
         
         for contact in sortedContacts {
-            parsedContactsSorted.append(ContactBubbleData(emoji: contact.emoji, name: contact.name, score: contact.score, size: CGFloat(contact.score) / CGFloat(maxScore!)))
+            let size = calculateSize(contact: contact, maxScore: CGFloat(maxScore!))
+            parsedContactsSorted.append(ContactBubbleData(emoji: contact.emoji, name: contact.name, score: contact.score, size: size))
         }
+    }
+
+    mutating func calculateSize(contact: Contact, maxScore: CGFloat) -> CGFloat {
+        let size: CGFloat = CGFloat(contact.score) / CGFloat(maxScore)
+        return size
     }
     
     mutating func toggleContactSelectionState(_ contact: Contact) {

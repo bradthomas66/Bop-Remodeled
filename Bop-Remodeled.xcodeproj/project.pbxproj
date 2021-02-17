@@ -230,12 +230,12 @@
 		3C50A7832593BD0F00AA4B4F /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				3CBE1B49259A8FF0008A1ECB /* TextFieldWrapper.swift */,
 				3C50A7842593BD2600AA4B4F /* Int+NumberFormatter.swift */,
 				3CC301FA259556660054A915 /* UIImage+Color.swift */,
 				3CC302102596D3500054A915 /* View+navigationBarColor.swift */,
 				3C3F875D259D3230003A9003 /* Character+EmojiDetection.swift */,
 				3C3F8762259D3440003A9003 /* String+EmojiDetection.swift */,
+				3CBE1B49259A8FF0008A1ECB /* TextFieldWrapper.swift */,
 				3CE973DA258ED8DF00FA2E14 /* ColorManager.swift */,
 				3C823D0A25B5291000C3C043 /* Constants.swift */,
 				3CB4AC5625BA8BA000D5815A /* Publishers.swift */,

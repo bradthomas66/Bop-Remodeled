@@ -61,7 +61,7 @@ struct ContactBarInfoStack: View {
     
     var body: some View {
         VStack (alignment: .leading) {
-            Text (contact.name)
+            Text (contact.firstName + " " + contact.lastName)
                 .foregroundColor(contact.isSelected ? ColorManager.button : ColorManager.whiteText)
                 .font(.headline)
             Text (scoreWithCommas)
@@ -86,7 +86,7 @@ struct ContactBar_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            ContactBarView(contact: Contact(initials: "BT", name: "Brad Thomas", score: 250000, emoji: "🥵", pending: false), scoreWithCommas: "250,000")
+            ContactBarView(contact: Contact(initials: "BT", firstName: "Brad", lastName: "Thomas", score: 250000, username: "Coolguy", emoji: "🥵", pending: false), scoreWithCommas: "250,000")
         }
         
     }

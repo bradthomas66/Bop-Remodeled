@@ -15,4 +15,5 @@ struct ColorManager {
     static let backgroundGradientColors = Gradient(colors: [ColorManager.backgroundTopLeft, ColorManager.backgroundBottomRight])
     static let lightGrey = Color("lightGrey")
     static let whiteText = Color(.white)
+    static let darkGrey = Color("darkGrey")
 }

@@ -13,6 +13,8 @@ struct RegisterUsernamePopover: View {
     
     @Binding var username: String
     
+    @Binding var usernameFieldHasContents: Bool
+    
     var body: some View {
         ZStack {
             VStack {
@@ -27,6 +29,11 @@ struct RegisterUsernamePopover: View {
                 Divider().padding([.leading, .trailing])
                 TextField("Username", text: $username)
                     .padding()
+                    .onChange(of: username, perform: { value in
+                        if value != "" {
+                            usernameFieldHasContents = true
+                        }
+                    })
             }
             .frame(minHeight: parentViewHeight * 0.2, maxHeight: parentViewHeight * 0.25)
             .padding([.top, .bottom])
@@ -40,7 +47,7 @@ struct RegisterUsernamePopover_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            RegisterUsernamePopover(parentViewHeight: 460, username: .constant("Coolguy"))
+            RegisterUsernamePopover(parentViewHeight: 460, username: .constant("Coolguy"), usernameFieldHasContents: .constant(true))
         }
     }
 }

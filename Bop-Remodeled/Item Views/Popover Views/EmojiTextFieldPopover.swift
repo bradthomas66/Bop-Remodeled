@@ -39,24 +39,57 @@ struct TextFieldBar: View {
     
     @Binding var emojiText: String
     
-    var body: some View {
-        HStack {
-            ButtonSpacer(capsuleWidth: capsuleWidth, capsuleHeight: capsuleHeight)
-            Spacer()
-            TextFieldWrapperView(emojiText: $emojiText)
-            Spacer()
-            Button(action: {print ("send message")}, label: {
-                SendButton(capsuleWidth: capsuleWidth, capsuleHeight: capsuleHeight)
-            })
+    @State private var swipeOffset = CGSize.zero
+    @State private var emojiTextFieldHasContents: Bool = false
+    @State private var swipeActivated: Bool = false {
+        didSet {
+            if swipeActivated == true {
+                print("sending Message")
+            }
         }
     }
-    private let capsuleWidth: CGFloat = 50
-    private let capsuleHeight: CGFloat = 30
+        
+    private var isShowingSendBar: Bool {
+        if emojiTextFieldHasContents {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    var body: some View {
+        ZStack {
+            HStack {
+                Spacer()
+                TextFieldWrapperView(emojiText: $emojiText, emojiTextFieldHasContents: $emojiTextFieldHasContents)
+                Spacer()
+            }
+            
+            SwipeBar(height: 100, width: 5)
+                .opacity(isShowingSendBar ? 1 : 0)
+                .offset(x: swipeOffset.width)
+                .gesture(
+                    DragGesture()
+                        .onChanged { gesture in
+                            if gesture.translation.width < 0 {
+                                swipeOffset.width = gesture.translation.width
+                                if swipeOffset.width <= -75 {
+                                    swipeOffset.width = 0
+                                    if isShowingSendBar {
+                                        swipeActivated = true
+                                    }
+                                }
+                            }
+                        }
+                )
+        }
+    }
 }
 
 struct TextFieldWrapperView: View {
     
     @Binding var emojiText: String
+    @Binding var emojiTextFieldHasContents: Bool
     
     var body: some View {
         ZStack {
@@ -66,6 +99,11 @@ struct TextFieldWrapperView: View {
                 .frame(width: circleWidth, height: circleHeight)
             TextFieldWrapper(emojiText: $emojiText, fontSize: emojiTextSize)
                 .frame(width: circleWidth, height: circleHeight)
+                .onChange(of: emojiText, perform: { value in
+                    if value != "" {
+                        emojiTextFieldHasContents = true
+                    }
+                })
         }
     }
     private let emojiTextSize: CGFloat = 30

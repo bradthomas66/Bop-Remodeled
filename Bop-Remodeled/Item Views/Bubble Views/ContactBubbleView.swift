@@ -10,20 +10,28 @@ import SwiftUI
 struct ContactBubbleView: View {
     
     var contact: ContactBubbleData
+    @EnvironmentObject var interactionHandler: BopMapInteractionHandler
+    private let constants = Constants()
     
-    init (contact: ContactBubbleData) {
-        self.contact = contact
+    private var zoomScale: CGFloat {
+        get {
+            let temp: CGFloat = min(
+                interactionHandler.steadyStateZoomScale * pow((-interactionHandler.currentZoomScalar/interactionHandler.scrollOffset.y), 2.0),
+                interactionHandler.smallestContactZoom)
+            return temp
+        }
     }
     
     var body: some View {
-        ZStack {
-            ContactBoundingCircle()
-                .frame(width: maxCircleSize * contact.size, height: maxCircleSize * contact.size)
-            ContactContentStack(contact: contact, maxCircleSize: maxCircleSize)
-                .frame(width: maxCircleSize * contact.size, height: maxCircleSize * contact.size)
+        GeometryReader { geometry in
+            ZStack {
+                ContactBoundingCircle()
+                ContactContentStack(contact: contact)
+            }
         }
+        .frame(width: constants.maxCircleSize * contact.size * zoomScale, height: constants.maxCircleSize * contact.size * zoomScale, alignment: .center)
+        .padding([.leading, .trailing])
     }
-    private let maxCircleSize: CGFloat = 300
 }
 
 struct ContactBoundingCircle: View {
@@ -41,19 +49,21 @@ struct ContactBoundingCircle: View {
 struct ContactContentStack: View {
     var contact: ContactBubbleData
     private var scoreWithCommas: String
-    let maxCircleSize: CGFloat
+    private let constants = Constants()
     
-    init (contact: ContactBubbleData, maxCircleSize: CGFloat) {
+    init (contact: ContactBubbleData) {
         self.scoreWithCommas = contact.score.withCommas()
         self.contact = contact
-        self.maxCircleSize = maxCircleSize
     }
+    
+    @EnvironmentObject var interactionHandler: BopMapInteractionHandler
     
     var body: some View {
         GeometryReader { geometry in
             HStack {
                 Spacer()
                 VStack {
+                    Spacer()
                     Text(contact.emoji).foregroundColor(ColorManager.whiteText)
                         .font(Font.system(size: min(geometry.size.height, geometry.size.width) * emojiFontScale))
                     Text(scoreWithCommas).foregroundColor(ColorManager.whiteText)
@@ -76,6 +86,7 @@ struct ContactBubble_Previews: PreviewProvider {
         ZStack{
             Rectangle().edgesIgnoringSafeArea(.all)
             ContactBubbleView(contact: ContactBubbleData(emoji: "👽", name: "Brad Thomas", score: 4000000, size: 1))
+                .environmentObject(BopMapInteractionHandler())
         }
         
     }

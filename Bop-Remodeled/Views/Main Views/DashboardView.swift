@@ -22,28 +22,34 @@ struct DashboardView: View {
                 
                 ZStack {
                     Background()
-                    VStack {
+                    ZStack {
                         ChatBubbleScrollView(chatHandler: chatHandler, geometry: geometry, offScreenOffset: offScreenOffset)
-                        SendMessageButton()
-                    }.onAppear(perform: {chatHandler.parseChats()})
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                SendMessageButton().padding(.trailing)
+                            }
+                        }
+                    }
                     .navigationTitle("Dashboard").navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
                     .navigationBarItems(leading:
                                             NavigationLink (
                                                 destination: SettingsView(),
-                                                label: {Image(systemName: "gearshape.fill")}),
+                                                label: {Image(systemName: "gearshape.fill")}
+                                            ),
                                         trailing:
-                                            NavigationLink ( destination: BopMapView(), label: { Image(systemName: "person.crop.circle.badge.plus").foregroundColor(.white)}))
+                                            NavigationLink (
+                                                destination: BopMapView().environmentObject(BopMapInteractionHandler()),
+                                                label: { Image(systemName: "person.crop.circle.badge.plus").foregroundColor(.white)}
+                                            )
+                    )
+                    
                     VStack {
                         Spacer()
-                        if !interactionHandler.anyParentHasBeenTapped {
-                            ChatBubblePopover(parentViewHeight: screenHeight)
-                                .offset(y: interactionHandler.chatPopoverOffset)
-                        } else {
-                            ChatBubblePopover(parentViewHeight: screenHeight)
-                                .offset(y: interactionHandler.chatPopoverOffset)
-                        }
+                        ChatBubblePopover(parentViewHeight: screenHeight)
+                            .offset(y: interactionHandler.chatPopoverOffset)
                     }
-                    
                 }
             }
         }
@@ -51,6 +57,60 @@ struct DashboardView: View {
     private let chatPopoverOffsetDragValueScale: Double = 0.1
     private let circleShadowRadius: CGFloat = 5
     private let circleForegroundOpacity: Double = 0.1
+}
+
+struct ChatBubbleScrollView: View {
+    
+    @ObservedObject var chatHandler: ChatHandler
+    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+    
+    let geometry: GeometryProxy
+    let offScreenOffset: CGFloat
+    
+    //@State private var chatsOnScreen: [ChatBubbleData] = [] //think we can delete
+    
+    var body: some View {
+        ScrollViewReader { action in
+            ScrollView ( //See View Preferences
+                axes: .vertical,
+                showsIndicators: false,
+                offsetChanged: {
+                    interactionHandler.scrollOffset.y = $0.y - 1 //to ensure not divided by zero
+                }
+            ) {
+                ZStack {
+                    if interactionHandler.isShowingPopover {
+                        ChatBubblePopoverBackgroundRectangle(geometry: geometry, offScreenOffset: offScreenOffset)
+                    }
+                    LazyVStack {
+                        ForEach(chatHandler.parsedChatsSorted) { chat in
+                            ChatBubbleView(chatToBubble: ChatBubbleData(content: chat.content, frequency: chat.frequency, size: chat.size, id: chat.id))
+                                .onAppear(perform: {
+                                    if chat.zoomScalar > 1.5 {
+                                        interactionHandler.currentZoomScalar = chat.zoomScalar
+                                    }
+                                    //chatsOnScreen = []
+                                    //chatsOnScreen.append(chat) //think we can delete
+                                })
+                        }.onReceive(interactionHandler.$activeChat, perform: { _ in
+                            var activeIndex: Int
+                            if interactionHandler.activeChat != nil {
+                                activeIndex = chatHandler.findIndexOfParsedChat(interactionHandler.activeChat!)
+                            } else {
+                                activeIndex = 1
+                            }
+                            if !chatHandler.parsedChatsSorted.isEmpty {
+                                action.scrollTo(activeIndex, anchor: .center)
+                            }
+                        })
+                    }.onAppear (perform: {
+                        chatHandler.parseChats()
+                        interactionHandler.zoomToSmallestChat(chatHandler.parsedChatsSorted)
+                    })
+                }
+            }
+        }
+    }
 }
 
 struct SendMessageButton: View {
@@ -68,68 +128,6 @@ struct SendMessageButton: View {
     }
     private let circleStrokeWidth: CGFloat = 2
     private let circleRadius: CGFloat = 50
-}
-
-struct ChatBubbleScrollView: View {
-    
-    @ObservedObject var chatHandler: ChatHandler
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
-    
-    let geometry: GeometryProxy
-    let offScreenOffset: CGFloat
-    
-    @State private var chatsOnScreen: [ChatBubbleData] = [] {
-        didSet {
-            zoomToLargestChat(chatsOnScreen)
-        }
-    }
-    @State private var zoomScale: CGFloat = 1.0
-    
-    var body: some View {
-        ScrollViewReader { action in
-            ScrollView {
-                ZStack {
-                    if interactionHandler.isShowingPopover {
-                        ChatBubblePopoverBackgroundRectangle(geometry: geometry, offScreenOffset: offScreenOffset)
-                    }
-                    LazyVStack {
-                        ForEach(chatHandler.parsedChatsSorted) { chat in
-                            ChatBubbleView(chatToBubble: ChatBubbleData(content: chat.content, frequency: chat.frequency, size: chat.size, id: chat.id), zoomScale: $zoomScale)
-                                .onAppear(perform: {
-                                    chatsOnScreen = []
-                                    chatsOnScreen.append(chat)
-                                })
-                        }.onReceive(interactionHandler.$activeChat, perform: { _ in
-                            var activeIndex: Int
-                            if interactionHandler.activeChat != nil {
-                                activeIndex = chatHandler.findIndexOfParsedChat(interactionHandler.activeChat!)
-                            } else {
-                                activeIndex = 1
-                            }
-                            if !chatHandler.parsedChatsSorted.isEmpty {
-                                withAnimation(.linear) {
-                                    action.scrollTo(activeIndex, anchor: .center)
-                                }
-                            }
-                        })
-                    }
-                }
-            }
-        }
-    }
-    private func zoomToLargestChat(_ data: [ChatBubbleData]) {
-        
-        var maxSize: CGFloat = 0.0
-        
-        for row in data {
-            if row.size > maxSize {
-                maxSize = row.size
-            }
-        }
-        
-        zoomScale = 0.8 / maxSize //inverse of chat.size; ex: chat.size = 0.5, zoomScale = 2 -> chat.size * zoomScale = 1
-        
-    }
 }
 
 struct ChatBubblePopoverBackgroundRectangle: View {

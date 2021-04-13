@@ -8,12 +8,16 @@
 import Foundation
 import Combine
 import SwiftUI
+import Firebase
 
 //View Model for drawing views related to the chats
 class ChatHandler: ObservableObject {
     
     //Chat model
     @Published private(set) var chatDatabase: ChatDatabase = ChatDatabase()
+    
+    //User view model
+    @Published var userDatabase = UserDatabase()
     
     //MARK: Access to the model
     var parsedChatsSorted: [ChatBubbleData] {
@@ -36,4 +40,14 @@ class ChatHandler: ObservableObject {
     func findIndexOfParsedChat(_ chat: ChatBubbleData) -> Int {
         chatDatabase.findIndexOfParsedChat(chat)
     }
+    
+//    func sendMessage (recipientUsername: String, emoji: String) {
+//        let message: [String: String] = [
+//            "sender": "me",
+//            "emoji": emoji
+//        ]
+//
+//        let newChat = chatDatabaseRoot.child(recipientUsername).child(timestamp)
+//        newChat.setValue(message)
+//    }
 }

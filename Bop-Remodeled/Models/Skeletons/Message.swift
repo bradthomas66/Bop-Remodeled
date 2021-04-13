@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Firebase
 
 struct Message: Identifiable {
     let senderUsername: String
@@ -14,4 +15,5 @@ struct Message: Identifiable {
     let id = UUID()
     let date: String = "12/30/20"
     let time: String = "12:00am"
+    //let timestamp: TimeInterval
 }

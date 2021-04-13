@@ -13,9 +13,9 @@ struct SettingsView: View {
             Background()
             ScrollView {
                 MyAccountButtons()
-                SupportButtons()
-                FeedbackButtons()
-                MoreButtons()
+//                SupportButtons()
+//                FeedbackButtons()
+//                MoreButtons()
             }
             
         }
@@ -32,6 +32,9 @@ struct SettingsView_Previews: PreviewProvider {
 }
 
 struct MyAccountButtons: View {
+    
+    @ObservedObject var authenticationHandler = AuthenticationHandler()
+    
     var body: some View {
         VStack {
             HStack {
@@ -42,34 +45,34 @@ struct MyAccountButtons: View {
                 Spacer()
             }
             Divider()
-            Button(action: {print("changing name")}) {
-                HStack {
-                    Text("My Name")
-                        .foregroundColor(.white)
-                        .font(.subheadline)
-                    Spacer()
-                }.padding(10)
-            }
-            Divider()
-            Button(action: {print("Changing card")}) {
-                HStack {
-                    Text("My Card")
-                        .foregroundColor(.white)
-                        .font(.subheadline)
-                    Spacer()
-                }.padding(10)
-            }
-            Divider()
-            Button(action: {print("changing birthday")}) {
-                HStack {
-                    Text("My Birthday")
-                        .foregroundColor(.white)
-                        .font(.subheadline)
-                    Spacer()
-                }.padding(10)
-            }
-            Divider()
-            Button(action: {print("signing out")}) {
+//            Button(action: {print("changing name")}) {
+//                HStack {
+//                    Text("My Name")
+//                        .foregroundColor(.white)
+//                        .font(.subheadline)
+//                    Spacer()
+//                }.padding(10)
+//            }
+//            Divider()
+//            Button(action: {print("Changing card")}) {
+//                HStack {
+//                    Text("My Card")
+//                        .foregroundColor(.white)
+//                        .font(.subheadline)
+//                    Spacer()
+//                }.padding(10)
+//            }
+//            Divider()
+//            Button(action: {print("changing birthday")}) {
+//                HStack {
+//                    Text("My Birthday")
+//                        .foregroundColor(.white)
+//                        .font(.subheadline)
+//                    Spacer()
+//                }.padding(10)
+//            }
+//            Divider()
+            Button(action: { authenticationHandler.signOut() }) {
                 HStack {
                     Text("Sign out")
                         .foregroundColor(.white)

@@ -61,16 +61,16 @@ struct LaunchView: View {
                     VStack {
                         Spacer()
                         if !loginHasBeenTapped { // if user hasnt touched the login button yet, present popover offscreen
-                            LoginPopover(parentViewHeight: screenHeight)
+                            LoginPopover()
                                 .offset(y: offScreenOffset)
                         } else {
-                            LoginPopover(parentViewHeight: screenHeight)
+                            LoginPopover()
                                 .offset(y: popoverOffset)
                         }
                     }
                 }
             }
-            .edgesIgnoringSafeArea(.bottom)
+            .ignoresSafeArea(.container)
             .navigationTitle("Bop")
             .navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
         }

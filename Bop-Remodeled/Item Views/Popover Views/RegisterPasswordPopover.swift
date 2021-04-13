@@ -14,6 +14,10 @@ struct RegisterPasswordPopover: View {
     @Binding var password: String
     @State var retypePassword: String = ""
     
+    @Binding var passwordFieldHasContents: Bool
+    
+    @State private var passwordsMatch: Bool? = nil
+    
     var body: some View {
         VStack {
             HStack {
@@ -29,6 +33,14 @@ struct RegisterPasswordPopover: View {
                 .padding()
             SecureField("Retype Password", text: $retypePassword)
                 .padding()
+                .onChange(of: retypePassword, perform: { value in
+                    if value != password {
+                        passwordsMatch = false
+                    }
+                    if value != "" {
+                        passwordFieldHasContents = true
+                    }
+                })
         }
         .frame(minHeight: parentViewHeight * 0.33, maxHeight: parentViewHeight * 0.4)
         .padding([.top, .bottom])
@@ -41,7 +53,7 @@ struct RegisterPasswordPopover_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            RegisterPasswordPopover(parentViewHeight: 460, password: .constant("test"))
+            RegisterPasswordPopover(parentViewHeight: 460, password: .constant("test"), passwordFieldHasContents: .constant(true))
         }
     }
 }

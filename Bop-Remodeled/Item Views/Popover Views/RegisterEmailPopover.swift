@@ -13,6 +13,8 @@ struct RegisterEmailPopover: View {
     
     @Binding var email: String
     
+    @Binding var emailFieldHasContents: Bool
+    
     var body: some View {
         ZStack {
             VStack {
@@ -27,6 +29,11 @@ struct RegisterEmailPopover: View {
                 Divider().padding([.leading, .trailing])
                 TextField("Email", text: $email)
                     .padding()
+                    .onChange(of: email, perform: { value in
+                        if value != "" {
+                            emailFieldHasContents = true
+                        }
+                    })
             }
             .frame(minHeight: parentViewHeight * 0.2, maxHeight: parentViewHeight * 0.25)
             .padding([.top, .bottom])
@@ -40,7 +47,7 @@ struct RegisterEmailPopover_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            RegisterEmailPopover(parentViewHeight: 460, email: .constant("bradley-thomas1@hotmail.com"))
+            RegisterEmailPopover(parentViewHeight: 460, email: .constant("bradley-thomas1@hotmail.com"), emailFieldHasContents: .constant(true))
         }
     }
 }

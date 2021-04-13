@@ -9,12 +9,12 @@ import Foundation
 
 struct Contact: Identifiable, Equatable {
     var initials: String
-    var name: String
+    var firstName: String
+    var lastName: String
     var score: Int
+    var username: String
     var emoji: String
     let id = UUID()
-    var pending: Bool
     var isSelected: Bool = false
-    var scores: [String: Double]? = nil
-    var contacts: [Contact]? = nil
+    var pending: Bool
 }

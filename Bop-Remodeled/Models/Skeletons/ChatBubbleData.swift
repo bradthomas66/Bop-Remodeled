@@ -13,4 +13,5 @@ struct ChatBubbleData: Identifiable, Hashable {
     let frequency: Int
     let size: CGFloat
     let id: Int
+    var zoomScalar: CGFloat = 1.0
 }

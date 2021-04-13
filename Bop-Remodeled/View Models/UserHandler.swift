@@ -41,4 +41,8 @@ class UserHandler: ObservableObject {
     func updateIsSelectedArray() {
         userDatabase.updateIsSelectedArray()
     }
+    
+    func findIndexOfContact(_ contact: Contact) -> Int {
+        userDatabase.findIndexOfContact(contact)
+    }
 }

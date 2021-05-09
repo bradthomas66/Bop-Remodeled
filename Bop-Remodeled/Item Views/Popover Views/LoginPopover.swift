@@ -30,6 +30,13 @@ struct LoginPopover: View {
     }
     @State private var swipeOffset = CGSize.zero
     
+    private var isShowingLoginButton: Bool {
+        if usernameFieldHasContents && passwordFieldHasContents {
+            return true
+        }
+        else { return false }
+    }
+    
     var body: some View {
         ZStack {
             VStack {
@@ -48,9 +55,9 @@ struct LoginPopover: View {
                         }
                     }
                     Spacer()
-                    SwipeBar(height: 50, width: 3)
+                    SwipeBar(height: 50)
                         .opacity(isShowingLoginButton ? 1 : 0)
-                        .offset(x: swipeOffset.width)
+                        .offset(x: swipeOffset.width + 10)
                         .gesture(
                             DragGesture()
                                 .onChanged { gesture in
@@ -95,13 +102,6 @@ struct LoginPopover: View {
                 self.password = ""
             }
         }
-    }
-    
-    private var isShowingLoginButton: Bool {
-        if usernameFieldHasContents && passwordFieldHasContents {
-            return true
-        }
-        else { return false }
     }
     
 }

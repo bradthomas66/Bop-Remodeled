@@ -10,19 +10,26 @@ import SwiftUI
 struct SwipeBar: View {
     
     let height: CGFloat
-    let width: CGFloat
+    let width: CGFloat = 50
     
     var body: some View {
-        Capsule()
-            .frame(width: width, height: height, alignment: .center)
-            .foregroundColor(ColorManager.darkGrey)
-            .padding(.horizontal, 30)
+        ZStack {
+            Rectangle()
+                .frame(width: width, height: height, alignment: .center)
+                .foregroundColor(ColorManager.darkGrey)
+                .cornerRadius(10)
+            HStack {
+                Image(systemName: "arrowtriangle.left.fill")
+                    .foregroundColor(.white)
+                    .padding(5)
+                Spacer()
+            }.frame(width: width, height: height, alignment: .center)
+        }
     }
-    
 }
 
 struct SwipeBar_Previews: PreviewProvider {
     static var previews: some View {
-        SwipeBar(height: 100, width: 3)
+        SwipeBar(height: 100)
     }
 }

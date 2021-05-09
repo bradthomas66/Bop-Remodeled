@@ -17,7 +17,7 @@ class UserHandler: ObservableObject {
         userDatabase.myContacts
     }
     
-    var parsedContactsSorted: [ContactBubbleData] {
+    var parsedContactsSorted: [ContactBarData] {
         userDatabase.parsedContactsSorted
     }
     
@@ -45,4 +45,5 @@ class UserHandler: ObservableObject {
     func findIndexOfContact(_ contact: Contact) -> Int {
         userDatabase.findIndexOfContact(contact)
     }
+
 }

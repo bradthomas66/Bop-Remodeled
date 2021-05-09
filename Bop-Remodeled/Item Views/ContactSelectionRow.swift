@@ -1,5 +1,5 @@
 //
-//  ContactBarView.swift
+//  ContactSelectionRow.swift
 //  Bop-Remodeled
 //
 //  Created by Brad Thomas on 2020-12-23.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContactBarView: View {
+struct ContactSelectionRow: View {
     
     @ObservedObject var chatHandler: ChatHandler = ChatHandler()
     
@@ -31,22 +31,20 @@ struct InitialsBoundingCircle: View {
     
     var contact: Contact
     
+    var constants = Constants()
+    
     var body: some View {
         ZStack {
             Circle()
-                .stroke(lineWidth: circleStrokeWidth)
-                .shadow(color: Color.white, radius: circleShadowRadius)
-                .frame(width: initialCircleRadius, height: initialCircleRadius)
+                .stroke(lineWidth: constants.circleStrokeWidth)
+                .shadow(color: Color.white, radius: constants.circleShadowRadius)
+                .frame(width: constants.initialCircleRadius, height: constants.initialCircleRadius)
                 .foregroundColor(contact.isSelected ? ColorManager.button : .white)
             Text(contact.initials)
                 .foregroundColor(contact.isSelected ? ColorManager.button : ColorManager.whiteText)
-                .font(Font.system(size: initialTextSize))
+                .font(Font.system(size: constants.initialTextSize))
         }.padding(.leading)
     }
-    private let circleShadowRadius: CGFloat = 5
-    private let circleStrokeWidth: CGFloat = 2
-    private let initialCircleRadius: CGFloat = 50
-    private let initialTextSize: CGFloat = 20
 }
 
 struct ContactBarInfoStack: View {
@@ -86,7 +84,7 @@ struct ContactBar_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            ContactBarView(contact: Contact(initials: "BT", firstName: "Brad", lastName: "Thomas", score: 250000, username: "Coolguy", emoji: "🥵", pending: false), scoreWithCommas: "250,000")
+            ContactSelectionRow(contact: Contact(initials: "BT", firstName: "Brad", lastName: "Thomas", score: 250000, username: "Coolguy", emoji: "🥵", pending: false), scoreWithCommas: "250,000")
         }
         
     }

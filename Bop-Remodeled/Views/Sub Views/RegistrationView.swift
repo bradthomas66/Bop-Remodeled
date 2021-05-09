@@ -30,7 +30,8 @@ struct RegistrationView: View {
     @State private var isShowingAnyPopover: Bool = false
     @State private var popoverOffset: CGFloat = 0.0
     
-    private var isShowingRegisterBar: Bool  {
+    private var isShowingRegisterBar: Bool
+    {
         if firstNameFieldHasContents && lastNameFieldHasContents && usernameFieldHasContents && passwordFieldHasContents && emailFieldHasContents {
             return true
         } else {
@@ -60,7 +61,7 @@ struct RegistrationView: View {
     
     var body: some View {
         GeometryReader { geometry in
-        
+            
             let screenWidth = geometry.size.width
             let screenHeight = geometry.size.height
             let offScreenOffset = screenHeight * 0.5 //offset to move popover offscreen
@@ -121,9 +122,9 @@ struct RegistrationView: View {
                         Spacer()
                         VStack {
                             Spacer()
-                            SwipeBar(height: 100, width: 5)
+                            SwipeBar(height: 100)
                                 .opacity(isShowingRegisterBar ? 1 : 0)
-                                .offset(x: swipeOffset.width)
+                                .offset(x: swipeOffset.width + 10)
                                 .gesture(
                                     DragGesture()
                                         .onChanged { gesture in
@@ -201,8 +202,7 @@ struct RegistrationView: View {
     }
     
     private func signUp() {
-        authenticationHandler.signUp(email: email ,password: password)
-        { (result, error) in
+        authenticationHandler.signUp(email: email ,password: password) { (result, error) in
             if let error = error {
                 print(error)
                 self.error = error.localizedDescription
@@ -223,16 +223,16 @@ struct RegistrationView: View {
     }
     
     private func writeUserToDatabase (username: String, email: String, firstName: String, lastName: String, authId: String) {
-    let newUser = userInformationDatabaseRoot.child(authId)
-    let userInfo = ["username": username,
-                    "email": email,
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    //"birthday": birthday,
-                    //"dateJoined": dateJoined
-                    ] as [String : String]
-    newUser.setValue(userInfo)
-}
+        let newUser = userInformationDatabaseRoot.child(authId)
+        let userInfo = ["username": username,
+                        "email": email,
+                        "firstName": firstName,
+                        "lastName": lastName,
+                        //"birthday": birthday,
+                        //"dateJoined": dateJoined
+        ] as [String : String]
+        newUser.setValue(userInfo)
+    }
     
 }
 

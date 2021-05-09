@@ -1,5 +1,5 @@
 //
-//  ChatBubblePopover.swift
+//  ChatBarPopover.swift
 //  Bop-Remodeled
 //
 //  Created by Brad Thomas on 2020-12-29.
@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct ChatBubblePopover: View {
+struct ChatBarPopover: View {
     
     var parentViewHeight: CGFloat
     
     @ObservedObject var chatHandler: ChatHandler = ChatHandler()
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+    @EnvironmentObject var interactionHandler: InteractionHandler
     
     var body: some View {
         ZStack {
@@ -29,13 +29,13 @@ struct ChatBubblePopover: View {
 
 struct ChatsScrollView: View {
     @ObservedObject var chatHandler: ChatHandler = ChatHandler()
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+    @EnvironmentObject var interactionHandler: InteractionHandler
     
     var body: some View {
         ScrollView {
             //replace with chats ordered by timestamp
             ForEach(chatHandler.chatsToMe) { chat in
-                if chat.content == interactionHandler.activeChat?.content {
+                if chat.emoji == interactionHandler.activeChat?.emoji {
                     VStack {
                         HStack {
                             Text(chat.senderUsername)
@@ -43,14 +43,14 @@ struct ChatsScrollView: View {
                                 .padding(.horizontal)
                             Spacer()
                             VStack {
-                                Text(chat.time)
+                                Text("12:57am")
                                     .font(.subheadline)
-                                Text(chat.date)
+                                Text("April 22/21")
                                     .font(.footnote)
                             }.padding(.horizontal)
                         }
                         Divider()
-                    }
+                    }.foregroundColor(ColorManager.darkGrey)
                 }
             }
         }
@@ -58,10 +58,10 @@ struct ChatsScrollView: View {
 }
 
 struct ChatBubbleTitleBar: View {
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+    @EnvironmentObject var interactionHandler: InteractionHandler
     var body: some View {
         HStack {
-            Text(interactionHandler.activeChat?.content ?? "")
+            Text(interactionHandler.activeChat?.emoji ?? "")
                 .font(.largeTitle)
                 .padding([.leading, .trailing])
                 .padding(.top)
@@ -75,8 +75,8 @@ struct ChatBubblePopoverView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack{
             Background()
-            ChatBubblePopover(parentViewHeight: 460)
-                .environmentObject(DashboardInteractionHandler())
+            ChatBarPopover(parentViewHeight: 460)
+                .environmentObject(InteractionHandler())
         }
     }
 }

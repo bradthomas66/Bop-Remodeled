@@ -11,7 +11,7 @@ import CoreData
 struct DashboardView: View {
     
     @ObservedObject var chatHandler: ChatHandler = ChatHandler()
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+    @EnvironmentObject var interactionHandler: InteractionHandler
     
     var body: some View {
         NavigationView {
@@ -23,16 +23,18 @@ struct DashboardView: View {
                 ZStack {
                     Background()
                     ZStack {
-                        ChatBubbleScrollView(chatHandler: chatHandler, geometry: geometry, offScreenOffset: offScreenOffset)
+                        ChatBarScrollView(geometry: geometry, offScreenOffset: offScreenOffset)
                         VStack {
                             Spacer()
                             HStack {
                                 Spacer()
-                                SendMessageButton().padding(.trailing)
+                                SendMessageButton()
+                                    .padding(.trailing)
                             }
                         }
                     }
                     .navigationTitle("Dashboard").navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
+                    .navigationBarTitleDisplayMode(.inline)
                     .navigationBarItems(leading:
                                             NavigationLink (
                                                 destination: SettingsView(),
@@ -40,80 +42,68 @@ struct DashboardView: View {
                                             ),
                                         trailing:
                                             NavigationLink (
-                                                destination: BopMapView().environmentObject(BopMapInteractionHandler()),
+                                                destination: ScoresView().environmentObject(InteractionHandler()),
                                                 label: { Image(systemName: "person.crop.circle.badge.plus").foregroundColor(.white)}
                                             )
                     )
                     
                     VStack {
                         Spacer()
-                        ChatBubblePopover(parentViewHeight: screenHeight)
-                            .offset(y: interactionHandler.chatPopoverOffset)
+                        ChatBarPopover(parentViewHeight: screenHeight)
+                            .offset(y: interactionHandler.popoverOffset)
                     }
                 }
             }
         }
     }
-    private let chatPopoverOffsetDragValueScale: Double = 0.1
-    private let circleShadowRadius: CGFloat = 5
-    private let circleForegroundOpacity: Double = 0.1
 }
 
-struct ChatBubbleScrollView: View {
-    
-    @ObservedObject var chatHandler: ChatHandler
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+struct ChatBarScrollView: View {
+
+    @EnvironmentObject var interactionHandler: InteractionHandler
+    @ObservedObject var chatHandler = ChatHandler()
+    let constants = Constants()
     
     let geometry: GeometryProxy
     let offScreenOffset: CGFloat
     
-    //@State private var chatsOnScreen: [ChatBubbleData] = [] //think we can delete
-    
     var body: some View {
         ScrollViewReader { action in
-            ScrollView ( //See View Preferences
-                axes: .vertical,
-                showsIndicators: false,
-                offsetChanged: {
-                    interactionHandler.scrollOffset.y = $0.y - 1 //to ensure not divided by zero
-                }
-            ) {
+            ScrollView () {
                 ZStack {
                     if interactionHandler.isShowingPopover {
-                        ChatBubblePopoverBackgroundRectangle(geometry: geometry, offScreenOffset: offScreenOffset)
+                        ChatBarPopoverBackgroundRectangle(geometry: geometry, offScreenOffset: offScreenOffset)
                     }
-                    LazyVStack {
+                    VStack(spacing: 0.0) {
                         ForEach(chatHandler.parsedChatsSorted) { chat in
-                            ChatBubbleView(chatToBubble: ChatBubbleData(content: chat.content, frequency: chat.frequency, size: chat.size, id: chat.id))
-                                .onAppear(perform: {
-                                    if chat.zoomScalar > 1.5 {
-                                        interactionHandler.currentZoomScalar = chat.zoomScalar
-                                    }
-                                    //chatsOnScreen = []
-                                    //chatsOnScreen.append(chat) //think we can delete
-                                })
-                        }.onReceive(interactionHandler.$activeChat, perform: { _ in
-                            var activeIndex: Int
-                            if interactionHandler.activeChat != nil {
-                                activeIndex = chatHandler.findIndexOfParsedChat(interactionHandler.activeChat!)
-                            } else {
-                                activeIndex = 1
-                            }
-                            if !chatHandler.parsedChatsSorted.isEmpty {
-                                action.scrollTo(activeIndex, anchor: .center)
-                            }
-                        })
-                    }.onAppear (perform: {
-                        chatHandler.parseChats()
-                        interactionHandler.zoomToSmallestChat(chatHandler.parsedChatsSorted)
+                            ChatBarView(chatToBar: ChatBarData(emoji: chat.emoji, score: chat.score, size: chat.size, id: chat.id), width: geometry.size.width, height: geometry.size.height * constants.barViewGlobalBarHeight)
+                                .padding(.vertical, constants.barViewGlobalPadding)
+                                .onTapGesture {
+                                    interactionHandler.handleBarTap(geometry: geometry, chatToBubble: chat)
+                                }
+                        }
+                    }
+                    .onReceive(interactionHandler.$activeChat, perform: { _ in
+                        var activeIndex: Int
+                        if interactionHandler.activeChat != nil {
+                            activeIndex = chatHandler.findIndexOfParsedChat(interactionHandler.activeChat!)
+                        } else {
+                            activeIndex = 1
+                        }
+                         if !chatHandler.parsedChatsSorted.isEmpty {
+                            action.scrollTo(activeIndex, anchor: .center)
+                        }
                     })
-                }
+                }.onAppear (perform: {
+                    chatHandler.parseChats()
+                })
             }
         }
     }
 }
 
 struct SendMessageButton: View {
+    
     var body: some View {
         ZStack {
             NavigationLink (
@@ -130,8 +120,8 @@ struct SendMessageButton: View {
     private let circleRadius: CGFloat = 50
 }
 
-struct ChatBubblePopoverBackgroundRectangle: View {
-    @EnvironmentObject var interactionHandler: DashboardInteractionHandler
+struct ChatBarPopoverBackgroundRectangle: View {
+    @EnvironmentObject var interactionHandler: InteractionHandler
     
     let geometry: GeometryProxy
     let offScreenOffset: CGFloat
@@ -149,7 +139,7 @@ struct DashboardView_Previews: PreviewProvider {
         ZStack {
             Background()
             DashboardView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-                .environmentObject(DashboardInteractionHandler())
+                .environmentObject(InteractionHandler())
         }
     }
 }

@@ -11,12 +11,12 @@ import UIKit
 struct TextFieldWrapper: UIViewRepresentable {
     
     @Binding var emojiText: String
+    
     var fontSize: CGFloat
     
     func makeUIView(context: UIViewRepresentableContext<TextFieldWrapper>) -> UITextField {
         let textField = EmojiTextField()
         textField.delegate = context.coordinator
-        //textField.becomeFirstResponder()
         textField.font = UIFont.systemFont(ofSize: fontSize)
         textField.textAlignment = .center
         return textField
@@ -35,20 +35,27 @@ struct TextFieldWrapper: UIViewRepresentable {
             self.parent = textField
         }
         
+        //logic for character limiting and emoji determination
         private func shouldTextFieldChangeCharacters(existingText: String?, newText: String, limit: Int) -> Bool {
             let text = existingText ?? ""
             let isNotAtLimit = text.count + newText.count <= limit
             var isPressingBackspace = false
             if newText == "" { isPressingBackspace = true }
-            if (isNotAtLimit && newText.isSingleEmoji) || isPressingBackspace { return true } else { return false }
+            if (isNotAtLimit && newText.isSingleEmoji) || isPressingBackspace {
+                parent.emojiText = newText
+                return true
+            } else {
+                return false
+            }
         }
         
+        //limits character
         func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
             return self.shouldTextFieldChangeCharacters(existingText: textField.text, newText: string, limit: 1)
         }
     }
     
-    //overrides to specify language
+    //overrides to specify emoji language
     class EmojiTextField: UITextField {
         override var textInputContextIdentifier: String { "" }
         override var textInputMode: UITextInputMode? {

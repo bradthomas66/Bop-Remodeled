@@ -85,12 +85,14 @@ PODS:
     - nanopb/encode (= 1.30905.0)
   - nanopb/decode (1.30905.0)
   - nanopb/encode (1.30905.0)
+  - ObjectMapper (4.2.0)
   - PromisesObjC (1.2.8)
 
 DEPENDENCIES:
   - Firebase/Analytics
   - Firebase/Auth
   - Firebase/Database
+  - ObjectMapper (~> 4.2.0)
 
 SPEC REPOS:
   trunk:
@@ -110,6 +112,7 @@ SPEC REPOS:
     - GTMSessionFetcher
     - leveldb-library
     - nanopb
+    - ObjectMapper
     - PromisesObjC
 
 SPEC CHECKSUMS:
@@ -129,8 +132,9 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 6f5c8abbab8a9bce4bb3f057e317728ec6182b10
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
+  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
 
-PODFILE CHECKSUM: da4d671f57d11ed2a6e8cf65a4eadd0352bf03f5
+PODFILE CHECKSUM: a30c9004ee022cb7f5437fedfc40a1a818244e05
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1

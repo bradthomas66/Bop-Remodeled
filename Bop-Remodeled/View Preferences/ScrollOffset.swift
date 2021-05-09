@@ -1,5 +1,5 @@
 //
-//  ScrollOffsetPreferenceKey.swift
+//  ScrollOffset.swift
 //  Bop-Remodeled
 //
 //  Created by Brad Thomas on 2021-03-04.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct ScrollOffsetPreferenceKey: PreferenceKey {
+struct ScrollOffset: PreferenceKey {
     static var defaultValue: CGPoint = .zero
     static func reduce (value: inout CGPoint, nextValue: () -> CGPoint) {}
 }
@@ -35,13 +35,13 @@ struct ScrollView<Content: View>: View {
             SwiftUI.ScrollView(axes, showsIndicators: showsIndicators) {
                 GeometryReader { geometry in
                     Color.clear.preference(
-                        key: ScrollOffsetPreferenceKey.self,
+                        key: ScrollOffset.self,
                         value: geometry.frame(in: .named("scrollView")).origin
                     )
                 }.frame(width: 0, height: 0)
                 content
             }
             .coordinateSpace(name: "scrollView")
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self, perform: offsetChanged)
+            .onPreferenceChange(ScrollOffset.self, perform: offsetChanged)
         }
 }

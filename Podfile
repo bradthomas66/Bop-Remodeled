@@ -9,6 +9,7 @@ target 'Bop-Remodeled' do
 pod 'Firebase/Analytics'
 pod 'Firebase/Auth'
 pod 'Firebase/Database' 
+pod 'ObjectMapper', '~> 4.2.0'
 
   target 'Bop-RemodeledTests' do
     inherit! :search_paths

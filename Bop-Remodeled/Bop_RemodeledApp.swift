@@ -15,7 +15,6 @@ struct Bop_RemodeledApp: App {
     
     @ObservedObject var authenticationHandler = AuthenticationHandler()
     @ObservedObject var chatHandler = ChatHandler()
-    @ObservedObject var userHandler = UserHandler()
     
     init() {
         FirebaseApp.configure()
@@ -27,7 +26,7 @@ struct Bop_RemodeledApp: App {
                 if authenticationHandler.sessionState != nil {
                     DashboardView()
                         .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                        .environmentObject(DashboardInteractionHandler())
+                        .environmentObject(InteractionHandler())
                 } else {
                     LaunchView()
                         .environment(\.managedObjectContext, persistenceController.container.viewContext)

@@ -33,7 +33,7 @@ struct LaunchView: View {
                     NavigationLink (
                         destination: RegistrationView(),
                         label: { GenericBubbleView(title: "Sign-up", subTitle: "", size: screenWidth * 0.55) }
-                    ).offset(x: -screenWidth * 0.1, y: -screenHeight * 0.2)
+                    ).offset(x: -screenWidth * 0.1, y: -screenHeight * 0.1)
                     
                     Button(action: {
                         isShowingLoginPopover = true
@@ -70,7 +70,7 @@ struct LaunchView: View {
                     }
                 }
             }
-            .ignoresSafeArea(.container)
+            .ignoresSafeArea(.container) //ignores container safe area but not keyboard safe area
             .navigationTitle("Bop")
             .navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
         }

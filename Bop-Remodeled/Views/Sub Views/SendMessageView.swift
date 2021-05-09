@@ -9,12 +9,11 @@ import SwiftUI
 
 struct SendMessageView: View {
     
-    @ObservedObject var userHandler: UserHandler = UserHandler()
-    @ObservedObject var chatHandler: ChatHandler = ChatHandler()
+    @ObservedObject var userHandler = UserHandler()
+    @ObservedObject var interactionHandler = InteractionHandler()
     
     @State private var isShowingSendButton: Bool = false
     @State private var isShowingPopover: Bool = false
-    @State private var popoverOffset: CGFloat = 0
     @State private var sendButtonHasEverBeenTapped: Bool = false //sets popover to offscreen once tapped the first time
     
     private let constants = Constants()
@@ -30,7 +29,7 @@ struct SendMessageView: View {
                 ScrollView {
                     VStack {
                         ForEach (userHandler.myContacts) { contact in
-                            ContactBarView (contact: contact, scoreWithCommas: contact.score.withCommas())
+                            ContactSelectionRow (contact: contact, scoreWithCommas: contact.score.withCommas())
                                 .onTapGesture(perform: {
                                     handleContactBarTap(contact: contact)
                                 })
@@ -39,26 +38,22 @@ struct SendMessageView: View {
                     }
                     Spacer()
                 }
-                
+
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: { // Send button
-                            
+                        Button(action: { //Send button
                             if isShowingSendButton {
-                                
                                 isShowingPopover = true
                                 sendButtonHasEverBeenTapped = true
                                 
-                                popoverOffset = offScreenOffset
+                                interactionHandler.popoverOffset = offScreenOffset
                                 
                                 withAnimation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 10)) {
-                                    popoverOffset = 0
+                                    interactionHandler.popoverOffset = 0
                                 }
                             }
-                            
-                            
                         }) {
                             ZStack {
                                 Capsule()
@@ -77,40 +72,35 @@ struct SendMessageView: View {
                             .padding([.bottom, .trailing])
                         }
                     }
-                    
                 }
                 
                 if isShowingPopover {
-                    
                     Rectangle()
                         .foregroundColor(.white)
                         .edgesIgnoringSafeArea(.all)
-                        .opacity(0.01)
+                        .opacity(0)
                         .onTapGesture(perform: {
-                            
                             withAnimation(.linear(duration: 0.1)) {
-                                popoverOffset = offScreenOffset
+                                interactionHandler.popoverOffset = offScreenOffset
                             }
-                            
                             isShowingPopover = false
                         })
-                    
                 }
                 
                 VStack {
                     Spacer()
-                    
                     if !sendButtonHasEverBeenTapped {
                         EmojiTextFieldPopover(parentViewHeight: screenHeight)
                             .offset(y: offScreenOffset)
                     } else if isShowingPopover {
-                        EmojiTextFieldPopover(parentViewHeight: screenHeight)
-                            .offset(y: popoverOffset)
+                        Group {
+                            EmojiTextFieldPopover(parentViewHeight: screenHeight)
+                                .offset(y: interactionHandler.popoverOffset)
+                        }
                     }
-                    
-                }
-                
-            }.navigationTitle("Send a Bop")
+                }.ignoresSafeArea(.container) //This provides keyboard avoidance!
+            }
+            .navigationTitle("Send a Bop")
             .navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
         }
     }
@@ -119,6 +109,7 @@ struct SendMessageView: View {
         if isShowingPopover == false {
             userHandler.toggleContactSelectionState(contact)
             userHandler.updateIsSelectedArray()
+            print("from handle contact tap \(userHandler.contactIsSelected)")
         }
         determineButtonStatus()
         if isShowingPopover == true {
@@ -139,14 +130,6 @@ struct SendMessageView: View {
         }
     }
 }
-
-
-
-
-
-
-
-
 
 struct SendMessageSubview_Previews: PreviewProvider {
     static var previews: some View {

@@ -72,8 +72,6 @@ class AuthenticationHandler: ObservableObject {
                 else {
                     let data = snapshot.value as? NSDictionary
                     self.currentUser?.username = data?["username"] as? String ?? ""
-                    
-                    print (self.currentUser?.username)
                 }
             })
     }

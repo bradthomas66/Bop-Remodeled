@@ -24,7 +24,7 @@ struct RegisterNamePopover: View {
                 Text("Register Name")
                     .font(.title)
                     .foregroundColor(ColorManager.backgroundTopLeft)
-                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                    .fontWeight(.bold)
                     .padding()
                 Spacer()
             }

@@ -11,24 +11,31 @@ import Firebase
 
 class AuthenticationHandler: ObservableObject {
     
-    @Published var sessionState: String? = nil {
-        didSet {
-            queryCurrentUser()
-        }
-    } //if nil, no user is signed in, if non-nil, string is signed-in users UID
+    @Published var sessionState: String? = nil
     
-    var currentUser: Contact? = nil
+    @Published var firstTimeLogin: Bool = UserDefaults.standard.bool(forKey: "firstTimeLogin")
     
     var authState: AuthStateDidChangeListenerHandle? = nil //auth state listener, listens for auth state change and sets sessionState on change
     
     //user sign up
     func signUp(email: String, password: String, handler: @escaping AuthDataResultCallback) {
-        Auth.auth().createUser(withEmail: email, password: password,  completion: handler)
+        Auth.auth().createUser(withEmail: email, password: password,  completion: handler) // on completion, register for notifications
+    }
+    
+    func turnOffFirstTimeLogin() {
+        firstTimeLogin = false
+        UserDefaults.standard.set(false, forKey: "firstTimeLogin")
     }
     
     //user sign in
     func signIn(email: String, password: String, handler: @escaping AuthDataResultCallback) {
-        Auth.auth().signIn(withEmail: email, password: password, completion: handler)
+        Auth.auth().signIn(withEmail: email, password: password, completion: handler) // on completion, register for notifications
+        
+        if (firstTimeLogin) {
+            firstTimeLogin = false
+        } else {
+            UserDefaults.standard.set(false, forKey: "firstTimeLogin")
+        }
     }
     
     //user sign out
@@ -59,20 +66,19 @@ class AuthenticationHandler: ObservableObject {
         }
     }
     
-    func queryCurrentUser() {
-        let currentUserAuthId = Auth.auth().currentUser?.uid ?? "nil"
+    func writeNewUserToInfoDatabase (username: String, email: String, firstName: String, lastName: String, authId: String, emoji: String) {
+        let newUser = userInformationDatabaseRoot.child(username)
+        let today = Date().timeIntervalSince1970
         
-        databaseRoot.queryOrdered(byChild: "userInformation")
-            .queryEqual(toValue: currentUserAuthId)
-            .observeSingleEvent(of: .value, with: {(snapshot) in
-                if !snapshot.exists() {
-                    print (currentUserAuthId)
-                    print ("Auth Id does not exist")
-                }
-                else {
-                    let data = snapshot.value as? NSDictionary
-                    self.currentUser?.username = data?["username"] as? String ?? ""
-                }
-            })
+        let userInfo = ["authId": authId,
+                        "email": email,
+                        "firstName": firstName,
+                        "lastName": lastName,
+                        //"birthday": birthday,
+                        "dateJoined": today,
+                        "emoji": emoji,
+                        "score": 0
+        ] as [String : Any]
+        newUser.setValue(userInfo)
     }
 }

@@ -13,5 +13,6 @@ struct ContactBarData: Identifiable {
     let name: String
     let score: Int
     let size: CGFloat
+    let pending: Bool
     let id = UUID()
 }

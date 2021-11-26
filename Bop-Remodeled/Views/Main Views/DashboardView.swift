@@ -10,92 +10,206 @@ import CoreData
 
 struct DashboardView: View {
     
-    @ObservedObject var chatHandler: ChatHandler = ChatHandler()
-    @EnvironmentObject var interactionHandler: InteractionHandler
+    @EnvironmentObject var sessionHandler: SessionHandler
+    
+    @ObservedObject var authenticationHandler = AuthenticationHandler()
+    
+    @State private var tutorialOffset: CGFloat = UIScreen.main.bounds.width
+    @State private var isShowingTutorial: Bool = true
+    @State private var replyPopoverOffset: CGFloat = UIScreen.main.bounds.height
     
     var body: some View {
-        NavigationView {
-            GeometryReader { geometry in
+        GeometryReader { geometry in
+            NavigationView {
                 
-                let screenHeight = geometry.size.height
-                let offScreenOffset = screenHeight * 0.5
+                let screenHeight = UIScreen.main.bounds.height
+                let screenWidth = UIScreen.main.bounds.width
                 
                 ZStack {
                     Background()
-                    ZStack {
-                        ChatBarScrollView(geometry: geometry, offScreenOffset: offScreenOffset)
+                    ChatBarScrollView(geometry: geometry)
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            SendMessageButton()
+                                .padding(.trailing)
+                        }
+                    }
+                    
+                    //this is for the normal chat info popover
+                    if sessionHandler.isShowingPopover {
+                        BackgroundRectangle(screenHeight: screenHeight)
                         VStack {
                             Spacer()
-                            HStack {
-                                Spacer()
-                                SendMessageButton()
-                                    .padding(.trailing)
+                            ChatBarPopover(parentViewHeight: screenHeight)
+                                .offset(y: sessionHandler.popoverOffset)
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { gesture in
+                                            if gesture.translation.height > 0 {
+                                                sessionHandler.popoverOffset = gesture.translation.height
+                                            }
+                                        }
+
+                                        .onEnded { _ in
+                                            if abs(sessionHandler.popoverOffset) > 100 {
+                                                sessionHandler.popoverOffset = screenHeight
+                                                sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                            } else {
+                                                sessionHandler.popoverOffset = 0.0
+                                            }
+                                        }
+                                )
+                        }
+                    }
+                    
+                    //This is for reply screen popover
+                    if  sessionHandler.isShowingReplyPopover {
+                        Rectangle()
+                            .foregroundColor(.blue)
+                            .edgesIgnoringSafeArea(.all)
+                            .opacity(0.01)
+                            .onTapGesture(perform: {
+                                UIApplication.shared.endEditing()
+                                withAnimation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 10)) {
+                                    replyPopoverOffset = screenHeight
+                                }
+                                sessionHandler.isShowingReplyPopover = false 
+                            })
+                        VStack {
+                            Spacer()
+                            EmojiTextFieldPopover(parentViewHeight: screenHeight * 0.5)
+                                .offset(y: sessionHandler.popoverOffset)
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { gesture in
+                                            if gesture.translation.height > 0 {
+                                                sessionHandler.popoverOffset = gesture.translation.height
+                                            }
+                                        }
+
+                                        .onEnded { _ in
+                                            if abs(sessionHandler.popoverOffset) > 100 {
+                                                sessionHandler.popoverOffset = screenHeight
+                                                sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                            } else {
+                                                sessionHandler.popoverOffset = 0.0
+                                            }
+                                        }
+                                )
+                        }
+                    }
+                    
+                    //tutorials
+                    if authenticationHandler.firstTimeLogin && isShowingTutorial {
+                        Rectangle()
+                            .foregroundColor(.black)
+                            .edgesIgnoringSafeArea(.all)
+                            .opacity(0.3)
+                            .blur(radius: 20)
+                            .onTapGesture {
+                                switch sessionHandler.activeTutorial {
+                                case "chats": sessionHandler.activeTutorial = "contact"
+                                case "contact": sessionHandler.activeTutorial = "addContact"
+                                case "sendButton":
+                                    sessionHandler.activeTutorial = "selectRecip"
+                                    isShowingTutorial = false
+                                case "scores": authenticationHandler.turnOffFirstTimeLogin()
+                                default: if isShowingTutorial {
+                                    authenticationHandler.turnOffFirstTimeLogin()
+                                }
+                                }
+                            }
+                        
+                        switch sessionHandler.activeTutorial {
+                        case "chats": ChatsTutorial()
+                        case "contact": ContactTutorial()
+                        case "addContact": ContactTutorial()
+                        case "sendButton": SendButtonTutorial(isShowingTutorial: $isShowingTutorial)
+                        case "selectRecip": EmptyView().onAppear(perform: {isShowingTutorial = false})
+                        default:
+                            if sessionHandler.hasSeenScoresTutorial {
+                                Text("Tap the screen to cancel")
+                                    .font(.footnote)
+                                    .foregroundColor(ColorManager.darkGrey)
+                                    .padding()
+                                    .frame(maxWidth: screenWidth * 0.42)
+                                    .background(ColorManager.lightGrey)
+                                    .cornerRadius(5)
+                                    .offset(x: screenWidth * 0.1, y: screenHeight * 0.3)
+                                    .onTapGesture {
+                                        authenticationHandler.turnOffFirstTimeLogin()
+                                    }
                             }
                         }
                     }
-                    .navigationTitle("Dashboard").navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
-                    .navigationBarTitleDisplayMode(.inline)
-                    .navigationBarItems(leading:
-                                            NavigationLink (
-                                                destination: SettingsView(),
-                                                label: {Image(systemName: "gearshape.fill")}
-                                            ),
-                                        trailing:
-                                            NavigationLink (
-                                                destination: ScoresView().environmentObject(InteractionHandler()),
-                                                label: { Image(systemName: "person.crop.circle.badge.plus").foregroundColor(.white)}
-                                            )
-                    )
                     
-                    VStack {
-                        Spacer()
-                        ChatBarPopover(parentViewHeight: screenHeight)
-                            .offset(y: interactionHandler.popoverOffset)
-                    }
-                }
+                }.navigationTitle("Dashboard")
+                    .navigationBarColor(UIColor(ColorManager.backgroundTopLeft))
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationBarItems(leading:
+                                        NavigationLink (
+                                            destination: SettingsView(),
+                                            label: {Image(systemName: "gearshape.fill")}
+                                        ),
+                                    trailing:
+                                        NavigationLink (
+                                            destination: ScoresView(),
+                                            label: { Image(systemName: "person.3.fill").foregroundColor(.white)}
+                                        ).simultaneousGesture(TapGesture().onEnded{
+                                            sessionHandler.activeTutorial = "addContact"
+                                        })
+                )
             }
-        }
+        }.onAppear(perform: {
+            sessionHandler.getChats()
+            sessionHandler.registerForPushNotifications()
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.5, blendDuration: 10)) {
+                tutorialOffset = 0
+            }
+        })
     }
 }
 
 struct ChatBarScrollView: View {
-
-    @EnvironmentObject var interactionHandler: InteractionHandler
-    @ObservedObject var chatHandler = ChatHandler()
-    let constants = Constants()
+    
+    @EnvironmentObject var sessionHandler: SessionHandler
     
     let geometry: GeometryProxy
-    let offScreenOffset: CGFloat
-    
+    let constants = Constants()
     var body: some View {
+        
+        let screenHeight = UIScreen.main.bounds.height
+        let screenWidth = UIScreen.main.bounds.width
+        
         ScrollViewReader { action in
             ScrollView () {
                 ZStack {
-                    if interactionHandler.isShowingPopover {
-                        ChatBarPopoverBackgroundRectangle(geometry: geometry, offScreenOffset: offScreenOffset)
-                    }
+                    //VStack spacing 0.0 is important for getting rid of dumb spacing between objects
                     VStack(spacing: 0.0) {
-                        ForEach(chatHandler.parsedChatsSorted) { chat in
-                            ChatBarView(chatToBar: ChatBarData(emoji: chat.emoji, score: chat.score, size: chat.size, id: chat.id), width: geometry.size.width, height: geometry.size.height * constants.barViewGlobalBarHeight)
+                        ForEach(sessionHandler.parsedChatsSorted) { chat in
+                            ChatBarView(chatToBar: ChatBarData(emoji: chat.emoji, score: chat.score, size: chat.size, id: chat.id), width: screenWidth * constants.barViewGlobalBarWidth, height: screenHeight * constants.barViewGlobalBarHeight)
                                 .padding(.vertical, constants.barViewGlobalPadding)
                                 .onTapGesture {
-                                    interactionHandler.handleBarTap(geometry: geometry, chatToBubble: chat)
+                                    sessionHandler.handleBarTap(geometry: geometry, chat: chat)
                                 }
                         }
                     }
-                    .onReceive(interactionHandler.$activeChat, perform: { _ in
+                    .onReceive(sessionHandler.$activeChat, perform: { _ in
                         var activeIndex: Int
-                        if interactionHandler.activeChat != nil {
-                            activeIndex = chatHandler.findIndexOfParsedChat(interactionHandler.activeChat!)
+                        if sessionHandler.activeChat != nil {
+                            activeIndex = sessionHandler.findIndexOfParsedChat(sessionHandler.activeChat!)
                         } else {
                             activeIndex = 1
                         }
-                         if !chatHandler.parsedChatsSorted.isEmpty {
+                        if !sessionHandler.parsedChatsSorted.isEmpty {
                             action.scrollTo(activeIndex, anchor: .center)
                         }
                     })
                 }.onAppear (perform: {
-                    chatHandler.parseChats()
+                    sessionHandler.popoverOffset = UIScreen.main.bounds.height
+                    sessionHandler.isShowingPopover = false
                 })
             }
         }
@@ -104,33 +218,78 @@ struct ChatBarScrollView: View {
 
 struct SendMessageButton: View {
     
+    let constants = Constants()
+    
     var body: some View {
         ZStack {
             NavigationLink (
                 destination: SendMessageView(),
                 label: {
                     Circle()
-                        .stroke(lineWidth: circleStrokeWidth)
+                        .stroke(lineWidth: constants.circleStrokeWidth)
                         .foregroundColor(ColorManager.button)
-                        .frame(width: circleRadius, height: circleRadius)
+                        .frame(width: constants.sendMessageCircleRadius, height: constants.sendMessageCircleRadius)
                 })
         }
     }
-    private let circleStrokeWidth: CGFloat = 2
-    private let circleRadius: CGFloat = 50
 }
 
-struct ChatBarPopoverBackgroundRectangle: View {
-    @EnvironmentObject var interactionHandler: InteractionHandler
-    
-    let geometry: GeometryProxy
-    let offScreenOffset: CGFloat
-    
+struct ContactTutorial: View {
+    @EnvironmentObject var sessionHandler: SessionHandler
     var body: some View {
-        Rectangle().foregroundColor(.white).edgesIgnoringSafeArea(.all).opacity(0.01).blur(radius: 20)
-            .onTapGesture(perform: {
-                interactionHandler.handleBackgroundTap(geometry: geometry, offScreenOffset: offScreenOffset)
-            })
+        let screenHeight = UIScreen.main.bounds.height
+        let screenWidth = UIScreen.main.bounds.width
+        Text("Tap the icon in the top right to view contact scores and add contacts")
+            .font(.footnote)
+            .foregroundColor(ColorManager.darkGrey)
+            .padding()
+            .frame(maxWidth: screenWidth * 0.42)
+            .background(ColorManager.lightGrey)
+            .cornerRadius(5)
+            .offset(x: screenWidth * 0.1, y: -screenHeight * 0.35)
+            .onTapGesture {
+                sessionHandler.activeTutorial = "chats"
+            }
+    }
+}
+
+
+
+struct ChatsTutorial: View {
+    @EnvironmentObject var sessionHandler: SessionHandler
+    var body: some View {
+        let screenWidth = UIScreen.main.bounds.width
+        Text("Chats will appear in the center of the screen.  Tap to view details about them")
+            .font(.footnote)
+            .foregroundColor(ColorManager.darkGrey)
+            .padding()
+            .frame(maxWidth: screenWidth * 0.42)
+            .background(ColorManager.lightGrey)
+            .cornerRadius(5)
+            .offset(x: 0, y: 0)
+            .onTapGesture {
+                sessionHandler.activeTutorial = "sendBop"
+            }
+    }
+}
+
+struct SendButtonTutorial: View {
+    @EnvironmentObject var sessionHandler: SessionHandler
+    @Binding var isShowingTutorial: Bool
+    var body: some View {
+        let screenHeight = UIScreen.main.bounds.height
+        let screenWidth = UIScreen.main.bounds.width
+        Text("Tap the button in the bottom right to select people to Bop")
+            .font(.footnote)
+            .foregroundColor(ColorManager.darkGrey)
+            .padding()
+            .frame(maxWidth: screenWidth * 0.42)
+            .background(ColorManager.lightGrey)
+            .cornerRadius(5)
+            .offset(x: screenWidth * 0.1, y: screenHeight * 0.3)
+            .onTapGesture {
+                isShowingTutorial = false
+            }
     }
 }
 
@@ -138,8 +297,8 @@ struct DashboardView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            DashboardView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-                .environmentObject(InteractionHandler())
+            DashboardView()
+                .environmentObject(SessionHandler())
         }
     }
 }

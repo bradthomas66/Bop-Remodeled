@@ -11,12 +11,21 @@ import Firebase
 
 struct RegistrationView: View {
     
+    let constants = Constants()
+    
+    @EnvironmentObject var sessionHandler: SessionHandler
+    
     @State private var firstName: String = ""
     @State private var lastName: String = ""
-    @State private var fullName: String = ""
+    
+    private var fullName: String {
+        firstName + " " + lastName
+    }
+    
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var email: String = ""
+    @State private var emoji: String = ""
     
     @State private var error: String = ""
     
@@ -25,27 +34,17 @@ struct RegistrationView: View {
     @State private var usernameFieldHasContents: Bool = false
     @State private var passwordFieldHasContents: Bool = false
     @State private var emailFieldHasContents: Bool = false
+    @State private var emojiFieldHasContents: Bool = false
     
-    @State private var anyParentHasBeenTapped: Bool = false
-    @State private var isShowingAnyPopover: Bool = false
-    @State private var popoverOffset: CGFloat = 0.0
-    
-    private var isShowingRegisterBar: Bool
-    {
-        if firstNameFieldHasContents && lastNameFieldHasContents && usernameFieldHasContents && passwordFieldHasContents && emailFieldHasContents {
+    private var isShowingRegisterButton: Bool {
+        if firstNameFieldHasContents && lastNameFieldHasContents && usernameFieldHasContents && passwordFieldHasContents && emailFieldHasContents && emojiFieldHasContents
+        {
             return true
         } else {
             return false
         }
     }
     
-    @State private var swipeActivated: Bool = false {
-        didSet {
-            if swipeActivated == true {
-                signUp()
-            }
-        }
-    }
     @State private var swipeOffset = CGSize.zero
     
     @ObservedObject var authenticationHandler = AuthenticationHandler()
@@ -55,147 +54,185 @@ struct RegistrationView: View {
         case email
         case username
         case password
+        case emoji
     }
     
     @State private var activePopover = Popovers.name
     
     var body: some View {
-        GeometryReader { geometry in
+        
+        let screenWidth = UIScreen.main.bounds.width
+        let screenHeight = UIScreen.main.bounds.height
+        let offScreenOffset = screenHeight * 0.5 //offset to move popover offscreen
+        
+        ZStack {
+            Background()
             
-            let screenWidth = geometry.size.width
-            let screenHeight = geometry.size.height
-            let offScreenOffset = screenHeight * 0.5 //offset to move popover offscreen
+            Button(action: {
+                activePopover = Popovers.name
+                sessionHandler.handleOtherParentTap()
+            }, label: {
+                GenericBubbleView(title: "Name", subTitle: fullName, size: screenWidth * 0.3)
+            }).offset(x: screenWidth * 0.3, y: -screenHeight * 0.25)
             
-            VStack {
-                ZStack {
-                    Background()
-                    
-                    Button(action: {
-                        isShowingAnyPopover = true
-                        anyParentHasBeenTapped = true
-                        activePopover = Popovers.name
-                        popoverOffset = offScreenOffset //initialize popover offscreen
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                            popoverOffset = 0.0
-                        }
-                    }, label: {
-                        GenericBubbleView(title: "Name", subTitle: fullName, size: screenWidth * 0.3)
-                    }).offset(x: screenWidth * 0.3, y: -screenHeight * 0.25)
-                    
-                    Button(action: {
-                        isShowingAnyPopover = true
-                        anyParentHasBeenTapped = true
-                        activePopover = Popovers.username
-                        popoverOffset = offScreenOffset //initialize popover offscreen
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                            popoverOffset = 0.0
-                        }
-                    }, label: {
-                        GenericBubbleView(title: "Username", subTitle: username, size: screenWidth * 0.35)
-                    }).offset(x: -screenWidth * 0.3, y: -screenHeight * 0.35)
-                    
-                    Button(action: {
-                        isShowingAnyPopover = true
-                        anyParentHasBeenTapped = true
-                        activePopover = Popovers.password
-                        popoverOffset = offScreenOffset //initialize popover offscreen
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                            popoverOffset = 0.0
-                        }
-                    }, label: {
-                        GenericBubbleView(title: "Password", subTitle: "", size: screenWidth * 0.25)
-                    }).offset(x: screenWidth * 0.25)
-                    
-                    Button(action: {
-                        isShowingAnyPopover = true
-                        anyParentHasBeenTapped = true
-                        activePopover = Popovers.email
-                        popoverOffset = offScreenOffset //initialize popover offscreen
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                            popoverOffset = 0.0
-                        }
-                    }, label: {
-                        GenericBubbleView(title: "Email", subTitle: email, size: screenWidth * 0.55)
-                    }).offset(x: -screenWidth * 0.15, y: screenHeight * 0.25)
-                    
+            Button(action: {
+                activePopover = Popovers.username
+                sessionHandler.handleOtherParentTap()
+            }, label: {
+                GenericBubbleView(title: "Username", subTitle: username, size: screenWidth * 0.35)
+            }).offset(x: -screenWidth * 0.3, y: -screenHeight * 0.35)
+            
+            Button(action: {
+                activePopover = Popovers.password
+                sessionHandler.handleOtherParentTap()
+            }, label: {
+                GenericBubbleView(title: "Password", subTitle: "", size: screenWidth * 0.25)
+            }).offset(x: screenWidth * 0.25, y: screenHeight * 0.10)
+            
+            Button(action: {
+                activePopover = Popovers.email
+                sessionHandler.handleOtherParentTap()
+            }, label: {
+                GenericBubbleView(title: "Email", subTitle: email, size: screenWidth * 0.5)
+            }).offset(x: screenWidth * 0, y: screenHeight * 0.30)
+            
+            Button(action: {
+                activePopover = Popovers.emoji
+                sessionHandler.handleOtherParentTap()
+            }, label: {
+                RegisterEmojiBubbleView(title: "Emoji", subTitle: emoji, size: screenWidth * 0.6)
+            }).offset(x: -screenWidth * 0.15, y: -screenHeight * 0.08)
+            
+            //Sign up Button
+            if isShowingRegisterButton {
+                VStack {
+                    Spacer()
                     HStack {
                         Spacer()
-                        VStack {
-                            Spacer()
-                            SwipeBar(height: 100)
-                                .opacity(isShowingRegisterBar ? 1 : 0)
-                                .offset(x: swipeOffset.width + 10)
-                                .gesture(
-                                    DragGesture()
-                                        .onChanged { gesture in
-                                            if gesture.translation.width < 0 {
-                                                swipeOffset.width = gesture.translation.width
-                                                if swipeOffset.width <= -75 {
-                                                    swipeOffset.width = 0
-                                                    if isShowingRegisterBar {
-                                                        swipeActivated = true
-                                                    }
-                                                }
-                                            }
-                                        }
-                                )
-                                .padding(.bottom, 200)
+                        Button(action: {signUp()}) {
+                            Image(systemName: "checkmark.circle")
+                                .foregroundColor(.green)
+                                .font(Font.system(size: 54))
                         }
                     }
-                    
-                    if isShowingAnyPopover {
-                        Rectangle()
-                            .foregroundColor(.white)
-                            .edgesIgnoringSafeArea(.all)
-                            .opacity(0.01)
-                            .onTapGesture(perform: {
-                                withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                                    popoverOffset = offScreenOffset
-                                }
-                                isShowingAnyPopover = false
-                            })
-                    }
-                    
-                    VStack {
-                        Spacer()
-                        if !anyParentHasBeenTapped { // if user hasnt touched the login button yet, present popover offscreen
-                            ZStack {
-                                switch activePopover {
-                                case .name:
-                                    RegisterNamePopover(parentViewHeight: screenHeight, firstName: $firstName, lastName: $lastName, fullName: $fullName, firstNameFieldHasContents: $firstNameFieldHasContents, lastNameFieldHasContents: $lastNameFieldHasContents)
-                                        .offset(y: offScreenOffset)
-                                case .email:
-                                    RegisterEmailPopover(parentViewHeight: screenHeight, email: $email, emailFieldHasContents: $emailFieldHasContents)
-                                        .offset(y: offScreenOffset)
-                                case .username:
-                                    RegisterUsernamePopover(parentViewHeight: screenHeight, username: $username, usernameFieldHasContents: $usernameFieldHasContents)
-                                        .offset(y: offScreenOffset)
-                                case .password:
-                                    RegisterPasswordPopover(parentViewHeight: screenHeight, password: $password, passwordFieldHasContents: $passwordFieldHasContents)
-                                        .offset(y: offScreenOffset)
-                                }
-                            }
-                        } else {
-                            ZStack {
-                                switch activePopover {
-                                case .name:
-                                    RegisterNamePopover(parentViewHeight: screenHeight, firstName: $firstName, lastName: $lastName, fullName: $fullName, firstNameFieldHasContents: $firstNameFieldHasContents, lastNameFieldHasContents: $lastNameFieldHasContents)
-                                        .offset(y: popoverOffset)
-                                case .email:
-                                    RegisterEmailPopover(parentViewHeight: screenHeight, email: $email, emailFieldHasContents: $emailFieldHasContents)
-                                        .offset(y: popoverOffset)
-                                case .username:
-                                    RegisterUsernamePopover(parentViewHeight: screenHeight, username: $username, usernameFieldHasContents: $usernameFieldHasContents)
-                                        .offset(y: popoverOffset)
-                                case .password:
-                                    RegisterPasswordPopover(parentViewHeight: screenHeight, password: $password, passwordFieldHasContents: $passwordFieldHasContents)
-                                        .offset(y: popoverOffset)
-                                }
-                            }
-                        }
-                    }.ignoresSafeArea(.container)
                 }
             }
+            
+            if sessionHandler.isShowingPopover {
+                BackgroundRectangle(screenHeight: offScreenOffset)
+            }
+            
+            VStack {
+                Spacer()
+                ZStack {
+                    switch activePopover {
+                    case .name:
+                        RegisterNamePopover(parentViewHeight: screenHeight, firstName: $firstName, lastName: $lastName, firstNameFieldHasContents: $firstNameFieldHasContents, lastNameFieldHasContents: $lastNameFieldHasContents)
+                            .offset(y: sessionHandler.popoverOffset)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        if gesture.translation.height > 0 {
+                                            sessionHandler.popoverOffset = gesture.translation.height
+                                        }
+                                    }
+
+                                    .onEnded { _ in
+                                        if abs(sessionHandler.popoverOffset) > 100 {
+                                            sessionHandler.popoverOffset = screenHeight
+                                            sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                        } else {
+                                            sessionHandler.popoverOffset = 0.0
+                                        }
+                                    }
+                            )
+                    case .email:
+                        RegisterEmailPopover(parentViewHeight: screenHeight, email: $email, emailFieldHasContents: $emailFieldHasContents)
+                            .offset(y: sessionHandler.popoverOffset)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        if gesture.translation.height > 0 {
+                                            sessionHandler.popoverOffset = gesture.translation.height
+                                        }
+                                    }
+
+                                    .onEnded { _ in
+                                        if abs(sessionHandler.popoverOffset) > 100 {
+                                            sessionHandler.popoverOffset = screenHeight
+                                            sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                        } else {
+                                            sessionHandler.popoverOffset = 0.0
+                                        }
+                                    }
+                            )
+                    case .username:
+                        RegisterUsernamePopover(parentViewHeight: screenHeight, username: $username, usernameFieldHasContents: $usernameFieldHasContents)
+                            .offset(y: sessionHandler.popoverOffset)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        if gesture.translation.height > 0 {
+                                            sessionHandler.popoverOffset = gesture.translation.height
+                                        }
+                                    }
+
+                                    .onEnded { _ in
+                                        if abs(sessionHandler.popoverOffset) > 100 {
+                                            sessionHandler.popoverOffset = screenHeight
+                                            sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                        } else {
+                                            sessionHandler.popoverOffset = 0.0
+                                        }
+                                    }
+                            )
+                    case .password:
+                        RegisterPasswordPopover(parentViewHeight: screenHeight, password: $password, passwordFieldHasContents: $passwordFieldHasContents)
+                            .offset(y: sessionHandler.popoverOffset)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        if gesture.translation.height > 0 {
+                                            sessionHandler.popoverOffset = gesture.translation.height
+                                        }
+                                    }
+
+                                    .onEnded { _ in
+                                        if abs(sessionHandler.popoverOffset) > 100 {
+                                            sessionHandler.popoverOffset = screenHeight
+                                            sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                        } else {
+                                            sessionHandler.popoverOffset = 0.0
+                                        }
+                                    }
+                            )
+                    case .emoji:
+                        RegisterEmojiPopover(parentViewHeight: screenHeight, emojiText: $emoji, emojiFieldHasContents: $emojiFieldHasContents)
+                            .offset(y: sessionHandler.popoverOffset)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        if gesture.translation.height > 0 {
+                                            sessionHandler.popoverOffset = gesture.translation.height
+                                        }
+                                    }
+
+                                    .onEnded { _ in
+                                        if abs(sessionHandler.popoverOffset) > 100 {
+                                            sessionHandler.popoverOffset = screenHeight
+                                            sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                        } else {
+                                            sessionHandler.popoverOffset = 0.0
+                                        }
+                                    }
+                            )
+                            
+                    }
+                }
+            }.ignoresSafeArea(.container)
+            .onAppear(perform: {
+                sessionHandler.popoverOffset = offScreenOffset
+            })
         }
         .navigationTitle("Register")
         .navigationBarTitleDisplayMode(.inline)
@@ -208,37 +245,30 @@ struct RegistrationView: View {
                 self.error = error.localizedDescription
             }
             else {
-                self.writeUserToDatabase(
+                let currentUserAuthId = Auth.auth().currentUser?.uid ?? ""
+                
+                UIApplication.shared.registerForRemoteNotifications()
+                
+                authenticationHandler.writeNewUserToInfoDatabase (
                     username: self.username,
                     email: self.email,
                     firstName: self.firstName,
                     lastName: self.lastName,
                     //birthday: self.birthday,
                     //dateJoined: Date()
-                    authId: Auth.auth().currentUser?.uid ?? ""
+                    authId: currentUserAuthId,
+                    emoji: self.emoji
                 )
                 self.password = ""
             }
         }
     }
-    
-    private func writeUserToDatabase (username: String, email: String, firstName: String, lastName: String, authId: String) {
-        let newUser = userInformationDatabaseRoot.child(authId)
-        let userInfo = ["username": username,
-                        "email": email,
-                        "firstName": firstName,
-                        "lastName": lastName,
-                        //"birthday": birthday,
-                        //"dateJoined": dateJoined
-        ] as [String : String]
-        newUser.setValue(userInfo)
-    }
-    
 }
 
 struct RegistrationView_Previews: PreviewProvider {
     static var previews: some View {
         RegistrationView()
+            .environmentObject(SessionHandler())
     }
 }
 

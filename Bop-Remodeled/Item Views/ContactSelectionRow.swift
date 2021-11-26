@@ -9,8 +9,6 @@ import SwiftUI
 
 struct ContactSelectionRow: View {
     
-    @ObservedObject var chatHandler: ChatHandler = ChatHandler()
-    
     var contact: Contact
     var scoreWithCommas: String
     
@@ -39,9 +37,9 @@ struct InitialsBoundingCircle: View {
                 .stroke(lineWidth: constants.circleStrokeWidth)
                 .shadow(color: Color.white, radius: constants.circleShadowRadius)
                 .frame(width: constants.initialCircleRadius, height: constants.initialCircleRadius)
-                .foregroundColor(contact.isSelected ? ColorManager.button : .white)
+                .foregroundColor(contact.pending ? ColorManager.darkGrey : (contact.isSelected ? ColorManager.button : .white))
             Text(contact.initials)
-                .foregroundColor(contact.isSelected ? ColorManager.button : ColorManager.whiteText)
+                .foregroundColor(contact.pending ? ColorManager.darkGrey : (contact.isSelected ? ColorManager.button : .white))
                 .font(Font.system(size: constants.initialTextSize))
         }.padding(.leading)
     }
@@ -60,20 +58,24 @@ struct ContactBarInfoStack: View {
     var body: some View {
         VStack (alignment: .leading) {
             Text (contact.firstName + " " + contact.lastName)
-                .foregroundColor(contact.isSelected ? ColorManager.button : ColorManager.whiteText)
+                .foregroundColor(contact.pending ? ColorManager.darkGrey : (contact.isSelected ? ColorManager.button : .white))
                 .font(.headline)
             Text (scoreWithCommas)
-                .foregroundColor(contact.isSelected ? ColorManager.button : ColorManager.whiteText)
+                .foregroundColor(contact.pending ? ColorManager.darkGrey : (contact.isSelected ? ColorManager.button : .white))
                 .font(.subheadline)
         }.padding(.leading)
     }
 }
 
 struct ContactBarEmoji: View {
+    
+    let constants = Constants()
+    
     var contact: Contact
+    
     var body: some View {
         Text (contact.emoji)
-            .font(Font.system(size: emojiTextSize))
+            .font(Font.system(size: constants.emojiTextSize))
             .padding(.trailing)
     }
     private let emojiTextSize: CGFloat = 40
@@ -84,7 +86,7 @@ struct ContactBar_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            ContactSelectionRow(contact: Contact(initials: "BT", firstName: "Brad", lastName: "Thomas", score: 250000, username: "Coolguy", emoji: "🥵", pending: false), scoreWithCommas: "250,000")
+            ContactSelectionRow(contact: Contact(firstName: "Brad", lastName: "Thomas", score: 250000, username: "Coolguy", emoji: "🥵", authId: "a1", pending: false), scoreWithCommas: "250,000")
         }
         
     }

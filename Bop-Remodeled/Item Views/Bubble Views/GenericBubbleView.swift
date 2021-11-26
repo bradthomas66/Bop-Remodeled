@@ -18,6 +18,16 @@ struct GenericBubbleView: View {
             return false
         }
     }
+    
+    var titleScale: CGFloat {
+        if size < 150 {
+            return 0.2
+        }
+        else {
+            return 0.15
+        }
+    }
+    
     var size: CGFloat
     private let constants = Constants()
     
@@ -36,15 +46,7 @@ struct GenericBubbleView: View {
                 }
             }
             
-        }.frame(width: size, height: size, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
-    }
-    private var titleScale: CGFloat {
-        if size < 150 {
-            return 0.2
-        }
-        else {
-            return 0.15
-        }
+        }.frame(width: size, height: size, alignment: .center)
     }
 }
 
@@ -52,7 +54,7 @@ struct GenericBubbleView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            GenericBubbleView(title: "Name", subTitle: "Brad Thomas", size: 240)
+            GenericBubbleView(title: "Name", subTitle: "☔️", size: 240)
         }
     }
 }

@@ -9,9 +9,17 @@ import SwiftUI
 
 struct ChatBarView: View {
     
-    let constants = Constants()
+    @EnvironmentObject var sessionHandler: SessionHandler
+    
+    //chat data input
     let chatToBar: ChatBarData
+    
+    //global constants
+    let constants = Constants()
+    
     @State private var frequencyFontWidth: CGFloat = 0.0
+    
+    @State private var thereAreUnreads: Bool = false
     
     let width: CGFloat
     let height: CGFloat
@@ -31,6 +39,7 @@ struct ChatBarView: View {
                     .cornerRadius(constants.barViewCornerRadius)
                     .foregroundColor(ColorManager.lightGrey)
                     .frame(height: min(height, width) * constants.barViewLocalBarHeight)
+                    .shadow(color: thereAreUnreads ? ColorManager.button : Color.clear, radius: 10)
                     .overlay(
                         RoundedRectangle(cornerRadius: constants.barViewCornerRadius)
                             .stroke(Color.clear, lineWidth: 4)
@@ -68,14 +77,27 @@ struct ChatBarView: View {
                     Spacer()
                 }
             }
-        }.padding(.horizontal)
+        }.onAppear(perform: {
+            checkIfThereAreUnreads()
+        })
+        .padding(.horizontal)
+    }
+    
+    func checkIfThereAreUnreads() {
+        for chat in sessionHandler.myChats {
+            if chat.emoji == chatToBar.emoji && chat.unread == true {
+                thereAreUnreads = true
+            }
+        }
     }
 }
 
 struct ChatBarView_Previews: PreviewProvider {
+    
     static var previews: some View {
         GeometryReader { geometry in
             ChatBarView(chatToBar: ChatBarData(emoji: "😈", score: 3, size: 0.5, id: 1), width: geometry.size.width, height: geometry.size.height * 0.1)
+                .environmentObject(SessionHandler())
         }
     }
 }

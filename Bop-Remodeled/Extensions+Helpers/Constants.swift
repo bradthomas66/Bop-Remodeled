@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct Constants {
+
     let circleShadowRadius: CGFloat = 5.0
     let circleStrokeWidth: CGFloat = 2.0
     let maxCircleSize: CGFloat = 250
@@ -23,6 +24,7 @@ struct Constants {
     let barViewBarWidth: CGFloat = 0.7
     let barViewLocalBarHeight: CGFloat = 0.4
     let barViewGlobalBarHeight: CGFloat = 0.1
+    let barViewGlobalBarWidth: CGFloat = 0.94
     let barViewTextPadding: CGFloat = 1.15
     let barViewCornerRadius: CGFloat = 10
     let barViewGlobalPadding: CGFloat = 7
@@ -32,4 +34,8 @@ struct Constants {
     let circleLineWidth: CGFloat = 2
     let initialTextSize: CGFloat = 20
     let initialCircleRadius: CGFloat = 50
+    let contactSelectionRowEmojiSelectionSize: CGFloat = 40
+    let sendMessageCircleRadius: CGFloat = 50
+    let spinnerCircleRadius: CGFloat = 10
+    let spinnerSpinRadius: CGFloat = 10
 }

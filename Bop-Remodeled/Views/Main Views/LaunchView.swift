@@ -11,11 +11,11 @@ import Combine
 
 struct LaunchView: View {
     
+    @EnvironmentObject var sessionHandler: SessionHandler
     @ObservedObject var authenticationHandler = AuthenticationHandler()
     
     @State private var loginHasBeenTapped: Bool = false //checks if the login button has ever been tapped in this instance
     @State private var isShowingLoginPopover: Bool = false //toggle that indicates if login popover is showing
-    @State private var popoverOffset: CGFloat = 0
     
     private let constants = Constants()
     
@@ -23,9 +23,9 @@ struct LaunchView: View {
         NavigationView {
             GeometryReader { geometry in
                 
-                let screenWidth = geometry.size.width
-                let screenHeight = geometry.size.height
-                let offScreenOffset = screenHeight * 0.5 //offset to move popover offscreen
+                let screenWidth = UIScreen.main.bounds.width
+                let screenHeight = UIScreen.main.bounds.height
+                let offScreenOffset = screenHeight * 0.5
                 
                 ZStack {
                     Background()
@@ -38,9 +38,9 @@ struct LaunchView: View {
                     Button(action: {
                         isShowingLoginPopover = true
                         loginHasBeenTapped = true
-                        popoverOffset = offScreenOffset //initialize popover offscreen
+                        sessionHandler.popoverOffset = offScreenOffset //initialize popover offscreen
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                            popoverOffset = 0.0
+                            sessionHandler.popoverOffset = 0.0
                         }
                     }, label: {
                         GenericBubbleView(title: "Login", subTitle: "", size: screenWidth * 0.35)
@@ -53,7 +53,7 @@ struct LaunchView: View {
                             .opacity(0.01)
                             .onTapGesture(perform: {
                                 withAnimation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 1 )) {
-                                    popoverOffset = offScreenOffset
+                                    sessionHandler.popoverOffset = offScreenOffset
                                 }
                                 isShowingLoginPopover = false
                             })
@@ -63,13 +63,33 @@ struct LaunchView: View {
                         if !loginHasBeenTapped { // if user hasnt touched the login button yet, present popover offscreen
                             LoginPopover()
                                 .offset(y: offScreenOffset)
+                            
                         } else {
                             LoginPopover()
-                                .offset(y: popoverOffset)
+                                .offset(y: sessionHandler.popoverOffset)
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { gesture in
+                                            if gesture.translation.height > 0 {
+                                                sessionHandler.popoverOffset = gesture.translation.height
+                                            }
+                                        }
+                                        .onEnded { _ in
+                                            if abs(sessionHandler.popoverOffset) > 100 {
+                                                sessionHandler.popoverOffset = screenHeight
+                                                sessionHandler.handleBackgroundTap(offScreenOffset: screenHeight)
+                                            } else {
+                                                sessionHandler.popoverOffset = 0.0
+                                            }
+                                        }
+                                )
                         }
                     }
                 }
             }
+//            .onAppear(perform: {
+//                UserDefaults.standard.set(true, forKey: "firstTimeLogin")
+//            })
             .ignoresSafeArea(.container) //ignores container safe area but not keyboard safe area
             .navigationTitle("Bop")
             .navigationBarColor(UIColor(ColorManager.backgroundTopLeft))

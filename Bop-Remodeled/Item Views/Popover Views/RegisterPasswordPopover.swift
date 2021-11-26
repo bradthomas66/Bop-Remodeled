@@ -16,7 +16,13 @@ struct RegisterPasswordPopover: View {
     
     @Binding var passwordFieldHasContents: Bool
     
-    @State private var passwordsMatch: Bool? = nil
+    private var passwordsMatch: Bool {
+        if password == retypePassword {
+            return true
+        } else {
+            return false
+        }
+    }
     
     var body: some View {
         VStack {
@@ -24,25 +30,24 @@ struct RegisterPasswordPopover: View {
                 Text("Register Password")
                     .font(.title)
                     .foregroundColor(ColorManager.backgroundTopLeft)
-                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                    .fontWeight(.bold)
                     .padding()
                 Spacer()
             }
             Divider().padding([.leading, .trailing])
             SecureField("Password", text: $password)
                 .padding()
+                .foregroundColor(ColorManager.darkGrey)
             SecureField("Retype Password", text: $retypePassword)
                 .padding()
+                .foregroundColor(ColorManager.darkGrey)
                 .onChange(of: retypePassword, perform: { value in
-                    if value != password {
-                        passwordsMatch = false
-                    }
                     if value != "" {
                         passwordFieldHasContents = true
                     }
                 })
         }
-        .frame(minHeight: parentViewHeight * 0.33, maxHeight: parentViewHeight * 0.4)
+        .frame(maxHeight: parentViewHeight * 0.3)
         .padding([.top, .bottom])
         .background(ColorManager.lightGrey)
         .cornerRadius(25.0)
@@ -53,7 +58,7 @@ struct RegisterPasswordPopover_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            RegisterPasswordPopover(parentViewHeight: 460, password: .constant("test"), passwordFieldHasContents: .constant(true))
+            RegisterPasswordPopover(parentViewHeight: 640, password: .constant("test"), passwordFieldHasContents: .constant(true))
         }
     }
 }

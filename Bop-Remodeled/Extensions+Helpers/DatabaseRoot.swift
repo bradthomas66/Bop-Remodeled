@@ -14,4 +14,5 @@ let chatDatabaseRoot = databaseRoot.child("chats")
 let userInformationDatabaseRoot = databaseRoot.child("userInformation")
 let scoresDatabaseRoot = databaseRoot.child("scores")
 let contactsDatabaseRoot = databaseRoot.child("contacts")
+let APNsDatabaseRoot = databaseRoot.child("APNs")
 

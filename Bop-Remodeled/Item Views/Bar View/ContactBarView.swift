@@ -27,9 +27,17 @@ struct ContactBarView: View {
             VStack {
                 Text(contactToBar.emoji)
                     .font(Font.system(size: min(height, width) * constants.emojiFontScale))
-                Text(contactToBar.name)
-                    .font(Font.system(size: min(height, width) * constants.nameFontScale))
-                    .foregroundColor(ColorManager.lightGrey)
+                Group {
+                    if contactToBar.pending == true {
+                        Text(contactToBar.name)
+                        .font(Font.system(size: min(height, width) * constants.nameFontScale))
+                        .foregroundColor(ColorManager.darkGrey)
+                    } else {
+                        Text(contactToBar.name)
+                        .font(Font.system(size: min(height, width) * constants.nameFontScale))
+                        .foregroundColor(ColorManager.lightGrey)
+                    }
+                }
             }.frame(width: min(height, width))
             
             ZStack {
@@ -81,7 +89,7 @@ struct ContactBarView: View {
 struct ContactBarView_Previews: PreviewProvider {
     static var previews: some View {
         GeometryReader { geometry in
-            ContactBarView(contactToBar: ContactBarData(emoji: "🙄", name: "Brad Thomas", score: 40000, size: 0.15), width: geometry.size.width, height: geometry.size.height*0.1)
+            ContactBarView(contactToBar: ContactBarData(emoji: "🙄", name: "Brad Thomas", score: 40000, size: 0.15, pending: true), width: geometry.size.width, height: geometry.size.height*0.1)
         }
     }
 }

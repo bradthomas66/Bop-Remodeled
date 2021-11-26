@@ -12,7 +12,6 @@ struct RegisterEmailPopover: View {
     var parentViewHeight: CGFloat
     
     @Binding var email: String
-    
     @Binding var emailFieldHasContents: Bool
     
     var body: some View {
@@ -22,13 +21,14 @@ struct RegisterEmailPopover: View {
                     Text("Register Email")
                         .font(.title)
                         .foregroundColor(ColorManager.backgroundTopLeft)
-                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                        .fontWeight(.bold)
                         .padding()
                     Spacer()
                 }
                 Divider().padding([.leading, .trailing])
                 TextField("Email", text: $email)
                     .padding()
+                    .foregroundColor(ColorManager.darkGrey)
                     .onChange(of: email, perform: { value in
                         if value != "" {
                             emailFieldHasContents = true
@@ -47,7 +47,7 @@ struct RegisterEmailPopover_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Background()
-            RegisterEmailPopover(parentViewHeight: 460, email: .constant("bradley-thomas1@hotmail.com"), emailFieldHasContents: .constant(true))
+            RegisterEmailPopover(parentViewHeight: 640, email: .constant("bradley-thomas1@hotmail.com"), emailFieldHasContents: .constant(true))
         }
     }
 }

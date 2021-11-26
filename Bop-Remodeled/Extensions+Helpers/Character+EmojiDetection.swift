@@ -3,7 +3,7 @@
 //  Bop-Remodeled
 //
 //  Created by Brad Thomas on 2020-12-30.
-//
+//  https://betterprogramming.pub/understanding-swift-strings-characters-and-scalars-a4b82f2d8fde
 
 import Foundation
 

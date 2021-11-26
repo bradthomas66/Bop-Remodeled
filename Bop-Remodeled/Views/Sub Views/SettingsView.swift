@@ -25,12 +25,6 @@ struct SettingsView: View {
     }
 }
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView()
-    }
-}
-
 struct MyAccountButtons: View {
     
     @ObservedObject var authenticationHandler = AuthenticationHandler()
@@ -190,5 +184,12 @@ struct MoreButtons: View {
             }
             Divider()
         }
+    }
+}
+
+
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView()
     }
 }

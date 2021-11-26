@@ -9,9 +9,14 @@ import SwiftUI
 
 struct LoginPopover: View {
     
+    
+    //This doesn't use parentView. If it sucks at scaling you know why
+    
     var constants = Constants()
     
     @ObservedObject var authenticationHandler = AuthenticationHandler()
+    
+    @EnvironmentObject var sessionHandler: SessionHandler
     
     @State private var email: String = ""
     @State private var password: String = ""
@@ -55,25 +60,20 @@ struct LoginPopover: View {
                         }
                     }
                     Spacer()
-                    SwipeBar(height: 50)
-                        .opacity(isShowingLoginButton ? 1 : 0)
-                        .offset(x: swipeOffset.width + 10)
-                        .gesture(
-                            DragGesture()
-                                .onChanged { gesture in
-                                    if gesture.translation.width < 0 {
-                                        swipeOffset.width = gesture.translation.width
-                                        if swipeOffset.width <= -75 {
-                                            swipeOffset.width = 0
-                                            swipeActivated = true
-                                        }
-                                    }
-                                }
-                        )
+                    if isShowingLoginButton {
+                        Button(action: {swipeActivated = true}) {
+                            Image(systemName: "checkmark.circle")
+                                .foregroundColor(.green)
+                                .font(Font.system(size: 54))
+                                .padding(.trailing)
+                        }
+                        
+                    }
                 }
                 Divider().padding([.leading, .trailing])
                 TextField("Email", text: $email)
                     .padding()
+                    .foregroundColor(ColorManager.darkGrey)
                     .onChange(of: email, perform: { value in
                         if value != "" {
                             usernameFieldHasContents = true
@@ -81,6 +81,7 @@ struct LoginPopover: View {
                     })
                 SecureField("Password", text: $password)
                     .padding()
+                    .foregroundColor(ColorManager.darkGrey)
                     .onChange(of: password, perform: { value in
                         if value != "" {
                             passwordFieldHasContents = true
@@ -98,6 +99,9 @@ struct LoginPopover: View {
             if let error = error {
                 self.error = error.localizedDescription
             } else {
+                
+                UIApplication.shared.registerForRemoteNotifications()
+                
                 self.email = ""
                 self.password = ""
             }

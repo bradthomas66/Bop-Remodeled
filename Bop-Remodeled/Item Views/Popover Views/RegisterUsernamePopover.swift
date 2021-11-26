@@ -12,7 +12,6 @@ struct RegisterUsernamePopover: View {
     var parentViewHeight: CGFloat
     
     @Binding var username: String
-    
     @Binding var usernameFieldHasContents: Bool
     
     var body: some View {
@@ -22,13 +21,14 @@ struct RegisterUsernamePopover: View {
                     Text("Register Username")
                         .font(.title)
                         .foregroundColor(ColorManager.backgroundTopLeft)
-                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                        .fontWeight(.bold)
                         .padding()
                     Spacer()
                 }
                 Divider().padding([.leading, .trailing])
                 TextField("Username", text: $username)
                     .padding()
+                    .foregroundColor(ColorManager.darkGrey)
                     .onChange(of: username, perform: { value in
                         if value != "" {
                             usernameFieldHasContents = true
